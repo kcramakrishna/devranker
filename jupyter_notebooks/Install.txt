@@ -1,0 +1,129 @@
+This document assumes that you are running a fairly recent release of a Linux distro.
+Important: You will need the ubuntu equivalent of build-essentials installed on your system
+
+1. Install python 3 
+
+2. Create virtual environment and install dependencies: 
+(We will work with a virtual environment for convenience.)
+$ python3 -m venv cg
+$ source cg/bin/activate
+$ pip install --upgrade pip
+$ pip3 install elasticsearch pandas pydriller jupyter
+
+Here is my current dependency/package list for reference:
+Package           Version
+----------------- ----------
+attrs             19.3.0
+backcall          0.1.0
+bleach            3.1.5
+certifi           2020.4.5.1
+chardet           3.0.4
+cycler            0.10.0
+decorator         4.4.2
+defusedxml        0.6.0
+elasticsearch     7.7.0
+elasticsearch-dsl 7.2.0
+entrypoints       0.3
+gitdb             4.0.5
+GitPython         3.1.2
+idna              2.9
+ipykernel         5.3.0
+ipython           7.14.0
+ipython-genutils  0.2.0
+jedi              0.17.0
+Jinja2            2.11.2
+joblib            0.15.1
+json5             0.9.4
+jsonschema        3.2.0
+jupyter-client    6.1.3
+jupyter-core      4.6.3
+jupyterlab        2.1.2
+jupyterlab-server 1.1.4
+kiwisolver        1.2.0
+lizard            1.17.3
+MarkupSafe        1.1.1
+matplotlib        3.2.1
+mistune           0.8.4
+nbconvert         5.6.1
+nbformat          5.0.6
+notebook          6.0.3
+numpy             1.18.4
+packaging         20.4
+pandas            1.0.3
+pandocfilters     1.4.2
+parso             0.7.0
+pexpect           4.8.0
+pickleshare       0.7.5
+pip               20.1.1
+prometheus-client 0.7.1
+prompt-toolkit    3.0.5
+ptyprocess        0.6.0
+PyDriller         1.15.1
+Pygments          2.6.1
+pyparsing         2.4.7
+pyrsistent        0.16.0
+python-dateutil   2.8.1
+pytz              2020.1
+pyzmq             19.0.1
+requests          2.23.0
+scikit-learn      0.23.1
+scipy             1.4.1
+Send2Trash        1.5.0
+setuptools        41.2.0
+six               1.15.0
+sklearn           0.0
+smmap             3.0.4
+terminado         0.8.3
+testpath          0.4.4
+threadpoolctl     2.0.0
+tornado           6.0.4
+traitlets         4.3.3
+urllib3           1.25.9
+wcwidth           0.1.9
+webencodings      0.5.1
+
+3. Ensure that Jupytr has access to this environment in a kernel:
+https://janakiev.com/blog/jupyter-virtual-envs/
+https://towardsdatascience.com/create-virtual-environment-using-virtualenv-and-add-it-to-jupyter-notebook-6e1bf4e03415
+http://queirozf.com/entries/jupyter-kernels-how-to-add-change-remove
+
+$ pip3 install ipykernel
+$ python -m ipykernel install --user --name=cg
+Installed kernelspec grimoire in /home/kc/.local/share/jupyter/kernels/cg
+$ vi ~/.local/share/jupyter/kernels/cg/kernel.json 
+{
+ "argv": [
+  "/usr/bin/python",
+  "-m",
+  "ipykernel_launcher",
+  "-f",
+  "{connection_file}"
+ ],
+ "display_name": "cg",
+ "language": "python"
+}
+
+Now pick this kernel when running the notebook.
+
+
+4. Install elastic server. 
+Note: Running an elastic docker is most convenient. Trying to install Elastic and dependencies can get quite laborious.
+We are working with Elastic 6.8. We have not tested with other versions. 
+https://hub.docker.com/_/elasticsearch
+Reason why we included Elastic in our architecture: Different features need different subsets of the git meta data. 
+Elastic gives us the ability to easily build data sets using filers.
+
+6. Clone the code:
+$ git clone: https://github.com/kcramakrishna/cg.git
+
+
+7. Invoke jupyter and open the notebook. Select the kernel 'cg'. Run each of the cells from top to bottom. 
+The cell where we are cloning from git can take a lot of time depending on the size of repository.
+
+
+8. What next?
+Play with the data
+Establish and document Pull Requests standards like appropriate documentation, research papers supporting the changes etc. 
+We will have to establish and document coding standards.
+Debate/Discuss moving to gitlab
+Where do we host our discussion forums
