@@ -7,3 +7,4 @@ This project aims to measure developer contribution to a project. Measurement of
 3. Open Source communities to encourage promising new members
 
 cg is short for Chitragupta (https://en.wikipedia.org/wiki/Chitragupta) the score keeper of good and bad deeds in Hindu mythology. We picked this as a temporary name for the project.
+
