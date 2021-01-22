@@ -1,42 +1,27 @@
 import PySimpleGUI as sg
 import os
 import git
-import sys
-from git import Repo
-import concurrent.futures
-import elasticsearch
-from elasticsearch import helpers
-from elasticsearch_dsl import Search, Q
-import queue
-from enum import Enum
-import elasticsearch
-from elasticsearch_dsl import Search, Q
-from elasticsearch import helpers
-import pandas as pd
 from pydriller import RepositoryMining
 import multiprocessing as mp
 from datetime import datetime
-import elasticsearch
 import pathlib
 import re
-from pathlib import Path
-import subprocess
-
+import pandas
 
 ####################################################
-# WIDTHs of Starting, Middle & Last Widgets
+# Widths of Starting, Middle & Last Widgets
 width_1 = 40
 width_2 = 40
 width_3 = 9
 
-# HEIGHTs of Starting, Middle & Last Widgets
+# Heights of Starting, Middle & Last Widgets
 height_1 = 1
 height_2 = 1
 height_3 = 1
 
 # Height of Vertical Bars which are representing STEPs
-v_height_1 = 20
-v_height_2 = 15
+v_height_1 = 10
+v_height_2 = 10
 v_height_3 = 10
 ####################################################
 
@@ -52,12 +37,9 @@ findBuggyFlag = False
 DEBUG = 0
 
 # Initializing Variables
-outputFileDirectory = ''
+DevrankerDir = ''
 gitDirectory = ''
-outputFileLocation = ''
-# Constant value which will be added to 'outputFileDirectory'
-# outputFileName = '/elasticray.git.csv'
-outputFileName = ''
+DestDirectory = ''
 
 ####################################################
 # Variables for 'PySimpleGui'
@@ -71,40 +53,8 @@ def liveLogs(msg1, msg2):
     print(msg1, '::\n', msg2)
     print('*****************')
 
-
-# Reading Values from 'devrankerClientConfig.txt' File
-# reader = open('devrankerClientConfig.txt', 'r')
-# Lines = reader.readlines()
-# reader.close()
-
-# liveLogs('Reading File ..... ', '')
-# lineNo = 0
-
-# for line in Lines:
-#     lineNo += 1
-
-#     print('Line No ', lineNo, '=>', line)
-
-#     if '=' in line:
-#         value = line.split('=')[1]
-#         value = value.strip()
-#         if 'findBuggyFlag' in line:
-#             findBuggyFlag = value
-#         elif 'DEBUG' in line:
-#             DEBUG = int(value)
-#         # elif 'outputFileDirectory' in line:
-#         #     outputFileDirectory = value
-#         elif 'gitUrl' in line:
-#           #  global gitUrl
-#             gitUrl = value
-# liveLogs('gitUrl', gitUrl)
-# liveLogs('outputFileDirectory', outputFileDirectory)
-# liveLogs('DEBUG', DEBUG)
-# liveLogs('typeof debug', type(DEBUG))
-# liveLogs('findBuggyFlag', findBuggyFlag)
-
 ####################################################
-# Sub LAYOUTs(Step1, Step2, Step3 & Step4) Preparation for Main Layout
+# Sub Layouts(Step1, Step2, Step3 & Step4) Preparation for Main Layout
 
 
 layout_step_1 = [
@@ -113,9 +63,8 @@ layout_step_1 = [
               disabled=True, size=(width_2, height_2)),
      sg.FolderBrowse('Browse', target='_i_GitDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'), button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
 
-
     [sg.Text('Select Destination Directory *', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
-     sg.Input(outputFileDirectory, key='_i_DestDirectory', enable_events=True, text_color='black',
+     sg.Input(DestDirectory, key='_i_DestDirectory', enable_events=True, text_color='black',
               disabled=True, size=(width_2, height_2)),
      sg.FolderBrowse('Browse', target='_i_DestDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'), button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
 
@@ -249,270 +198,116 @@ def updateProgressBar(value):
 # Reading devrankerClientConfig.txt file data
 
 
-def process_commit(commit, outputfile_fullpath ,repo):
-
-    # Creating empty lists for carrying commit data
-    doclist = []
-
-    # Create queues for commit data and blame data
-    q_blamelist = queue.Queue()
+def process_commit(commit, doclist):
 
     for mod in commit.modifications:
-        commit_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
-                       'message': commit.msg, 'authored_date': commit.author_date,
-                       'Committer': commit.committer.name, 'committed_date': commit.committer_date,
-                       'number_of_branches': len(commit.branches), 'in_main_branch': commit.in_main_branch,
-                       'merge_commit?': commit.merge,
-                       'number_of_mod_files': len(commit.modifications),
-                       'file_name': mod.filename,
-                       'file_change_type_name': mod.change_type.name,
-                       'file_change_type_value': mod.change_type.value,
-                       'file_old_path': mod.old_path, 'file_new_path': mod.new_path,
-                       'number_functions_before': len(mod.methods_before),
-                       'number_functions_after': len(mod.methods),
-                       # Existing methods changed.
-                       'number_functions_edited': len(mod.changed_methods),
-                       'number_lines_added': mod.added, 'number_lines_removed': mod.removed,
-                       'file_number_loc': mod.nloc, 'language_supported': mod.language_supported,
-                       # Can we get number of lines which are comments?
-                       #   Else,We may not need the below variable 'size'.
-                       'file_size': 0 if mod.source_code is None else len(mod.source_code.splitlines()),
-                       'dmm_unit_size': commit.dmm_unit_size,
-                       'dmm_unit_complexity': commit.dmm_unit_complexity,
-                       'dmm_unit_interfacing': commit.dmm_unit_interfacing,
-                       'file_complexity': mod.complexity,
-                       # We need to get exact details.
-                       'tokens': mod.token_count
-                       }
+
+        # Create a field 'file_ext' which is the file 'type'
+        file_ext = mod.new_path.apply(lambda x: pathlib.Path(str(x)).suffix).apply(lambda x: re.split(r"[^a-zA-Z0-9\s\++\_\-]", x)[-1])
+
+        # For files without any extension, mark 'file_ext' as "NoExt"
+        file_ext = file_ext.replace(r'^\s*$', 'NoExt', regex=True)
+
+        mod_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
+                    'message': commit.msg, 'authored_date': commit.author_date,
+                    'Committer': commit.committer.name, 'committed_date': commit.committer_date,
+                    'number_of_branches': len(commit.branches), 'in_main_branch': commit.in_main_branch,
+                    'merge_commit?': commit.merge,
+                    'number_of_mod_files': len(commit.modifications),
+                    'file_name': mod.filename,
+                    'file_ext': file_ext,
+                    'file_change_type_name': mod.change_type.name,
+                    'file_change_type_value': mod.change_type.value,
+                    'file_old_path': mod.old_path, 'file_new_path': mod.new_path,
+                    'number_functions_before': len(mod.methods_before),
+                    'number_functions_after': len(mod.methods),
+                    # Existing methods changed.
+                    'number_functions_edited': len(mod.changed_methods),
+                    'number_lines_added': mod.added, 'number_lines_removed': mod.removed,
+                    'file_number_loc': mod.nloc, 'language_supported': mod.language_supported,
+                    # Can we get number of lines which are comments?
+                    #   Else,We may not need the below variable 'size'.
+                    'file_size': 0 if mod.source_code is None else len(mod.source_code.splitlines()),
+                    'dmm_unit_size': commit.dmm_unit_size,
+                    'dmm_unit_complexity': commit.dmm_unit_complexity,
+                    'dmm_unit_interfacing': commit.dmm_unit_interfacing,
+                    'file_complexity': mod.complexity,
+                    # We need to get exact details.
+                    'tokens': mod.token_count
+                    }
 
         # loading each commit tuple into the list
-        doclist.append(commit_data)
-    
-    # Append 'doclist' to 'outputfile_fullpath'
-    # delete our lists
-    del doclist
-    del blamelist
-    del blamelist_fil
+        # List appending is threadsafe: https://stackoverflow.com/a/18568017
+        doclist.append(mod_data)
 
 
-def store_commit_data(local_dir, es, es_index, es_blame_index, local_commit, remote_commit):
+def store_commit_data(outputFileName, gitDirectory):
 
     if DEBUG >= 1:
         store_start = datetime.now()
         print('starting store_commit', store_start)
 
-    repo = Repo(local_dir)
+    # Creating empty lists for carrying commit data
+    doclist = []
 
     # Create Multithreading pool to use full CPU
     pool = mp.Pool(mp.cpu_count())
 
     # If the Repo has just been cloned, the program will traverse the whole Repo
-    if(local_commit == 'None'):
-        [pool.apply_async(process_commit(commit, repo, es, es_index, es_blame_index, local_dir)) for commit in
-         RepositoryMining(local_dir).traverse_commits()]
-
-    else:
-        [pool.apply_async(process_commit(commit, repo, es, es_index, es_blame_index, local_dir)) for commit in
-         RepositoryMining(local_dir, from_commit=local_commit, to_commit=remote_commit).traverse_commits()]
+    # kc - progress bar needs to use the commit number from here or from 'process_commit'
+    # https://dzone.com/articles/shared-counter-python%E2%80%99s
+    [pool.apply_async(process_commit(commit, doclist)) for commit in
+     RepositoryMining(gitDirectory).traverse_commits()]
 
     # Close Multiprocessing pool
     pool.close()
     pool.join()
+
+    # Write data to file
+    df = pandas.read_json(doclist)
+    df.to_csv(outputFileName)
+    sg.popup('Mining is done and File location is \n' + outputFileName)
+
     if DEBUG >= 1:
         store_end = datetime.now()
         print('exiting store_commit', store_end)
         print('time taken by store_commit', (store_end - store_start))
 
-    # Very important to explicitly refresh the Elastic indices as they are not automatically done.
-    es.indices.refresh([es_blame_index, es_index])
-
-
-
-def create_components(repoName, repo):
-    # if no url supplied for Elastic, assume the localhost
-    # if esurl == '':
-    try:
-        es = elasticsearch.Elasticsearch(['http://localhost:9200/'], maxsize=500, block=False)
-    except:
-        print('Elasticsearch not running at localhost:9200')
-        sys.exit(1)
-   
-    # Get the default commit index name
-    es_index_raw = repoName +'_'+'index'
-
-    # Get the default blame index name
-    es_blame_index_raw = repoName +'_'+'blame'+'_'+'index'
-    es_index = es_index_raw.lower()
-    es_blame_index = es_blame_index_raw.lower()
-
-  
-    try:
-        # Get the latest commit object in the local Repo
-        local_commit = repo.commit()
-    except:
-        print('No valid Repo found at the location. If unsure, remove the directory and try without local dir argument')
-        sys.exit(1)
-            # latest local commit
-
-        # Get the latest commit object in the remote Repo
-    remote = git.remote.Remote(repo, 'origin')      # remote repo
-    info = remote.fetch()[0]                        # fetch changes
-    remote_commit = info.commit
-
-        # If latest commit in local and remote differ then refresh the local Repo
-    # if (local_commit.hexsha == remote_commit.hexsha):
-    #      print('No changes in the Repo...')
-    # else:
-    #     repo = git.Repo(gitDirectory)
-    #     o = repo.remotes.origin
-    #     o.pull()
-         # Analyse and store additional commit data
-    liveLogs("local_commit", local_commit.hexsha)
-    liveLogs("remote_commit", remote_commit.hexsha)
-    
-    store_commit_data(gitDirectory, es, es_index, es_blame_index, local_commit.hexsha, remote_commit.hexsha)
-  
-    return es, es_index, es_blame_index
-
-
-def get_latest_commits(es_instance, commit_index, blame_index):
-    # Assigning Elastic instance, Commit Elastic Index and Blame Elastic Index to variables
-    es = es_instance
-    es_ma_index = commit_index
-    es_bl_index = blame_index
-    # Using Elasticsearch DSL function to get the data of Commit index
-    blame_es_data = Search(using=es, index=es_bl_index)
-    # Loading data into a dictionary
-    blame_dict = [hit.to_dict() for hit in blame_es_data.scan()]
-    # Using Elasticsearch DSL function to get the data of Blame index
-    commit_es_data = Search(using=es, index=es_ma_index)
-    # Loading data into a dictionary
-    commit_dict = [hit.to_dict() for hit in commit_es_data.scan()]
-    # Creating pandas dataframe for commit data
-    commit_frame = pd.DataFrame(commit_dict)
-    # Creating pandas dataframe for blame data
-    blame_frame = pd.DataFrame(blame_dict)
-    # Getting the blame row count. If the frame is empty, it means all the records are clean
-    blame_count = blame_frame.shape[0]
-    # print(blame_frame.columns)
-    if blame_count > 0:
-        blame_frame['file'] = blame_frame['file'].apply(
-            lambda x: x.split('/')[-1])
-        # Adding a column to Blame frame indicating that the row represents a Buggy commit
-        blame_frame['type'] = 'Buggy'
-        # Combining Commit frmae with Blame frame.
-        # An additional column called 'type' gets added to the Commit frame.
-        comb_frame = pd.merge(commit_frame, blame_frame, how='left', left_on=['hash', 'file_name'],
-                              right_on=['blame_hash', 'file'])
-    else:
-        # If the Blame frame is empty, no need to merge.
-        comb_frame = commit_frame
-        comb_frame['type'] = 'Clean'
-
-    # When merging happnes and 'type' column gets added to the main Commit frame,
-    # The rows that are not part of Blame frame are filled with 'Nan'.
-    # Here, all the NaNs from 'type' column are replaced with 'Clean' label.
-    # Effectively, Each commit file (one Commit can contain more than one file) is categorised as
-    #                 either Buggy or Clean.
-    comb_frame['type'] = comb_frame['type'].fillna('Clean')
-
-    # Cleaning and retaining the required columns
-    comb_frame_refined = comb_frame[['hash', 'Author', 'Email',
-                                     'message', 'authored_date',
-                                     'Committer', 'committed_date',
-                                     'number_of_branches', 'in_main_branch',
-                                     'merge_commit?',
-                                     'number_of_mod_files',
-                                     'file_name',
-                                     'file_change_type_name',
-                                     'file_change_type_value',
-                                     'file_old_path', 'file_new_path',
-                                     'number_functions_before',
-                                     'number_functions_after',
-                                     'number_functions_edited',
-                                     'number_lines_added', 'number_lines_removed',
-                                     'file_number_loc', 'language_supported',
-                                     'file_size',
-                                     'dmm_unit_size',
-                                     'dmm_unit_complexity',
-                                     'dmm_unit_interfacing',
-                                     'file_complexity',
-                                     'tokens',
-                                     'type'
-                                     ]]
-
-    # Create a coloumn 'file_ext' which is the file 'type'
-    comb_frame_refined['file_ext'] = comb_frame_refined['file_new_path'].\
-        apply(lambda x: pathlib.Path(str(x)).suffix).\
-        apply(lambda x: re.split(r"[^a-zA-Z0-9\s\++\_\-]", x)[-1])
-
-    # For files without any extension, mark 'file_ext' as "NoExt"
-    comb_frame_refined.file_ext = comb_frame_refined.file_ext.replace(
-        r'^\s*$', 'NoExt', regex=True)
-
-    # Sorting the frame by committed date
-    comb_frame_refined = comb_frame_refined.drop_duplicates(
-    ).sort_values('committed_date', ascending=False)
-
-    return comb_frame_refined
-
 
 def validateDirectories():
-    if(gitDirectory == ''):
-         sg.popup('Please Select Git Directory')
-    elif(outputFileDirectory == ''):
-         sg.popup('Please Select Output Directory')
+    if gitDirectory == '':
+        sg.popup('Please Select Git Directory')
+    elif DestDirectory == '':
+        sg.popup('Please Select Output Directory')
     else:
-         try:
-             repo = git.Repo(gitDirectory)
+        try:
+            repo = git.Repo(gitDirectory)
 
-             arrSplitGitDirectory = str.split(gitDirectory, '/')
-             global outputFileName
-             outputFileName = arrSplitGitDirectory[len(arrSplitGitDirectory)-1]
+            # Create 'Devranker' working Directory
+            # https://docs.python.org/3/library/os.path.html
+            DevrankerDir = os.path.join(DestDirectory, 'Devranker')
+            if not os.path.exists(DevrankerDir):
+                os.mkdir(DevrankerDir)
 
-             liveLogs("Repo Name", outputFileName)
-
-             startMiningProcess(outputFileName, repo)
-         except:
-             liveLogs('exc 599', sys.exc_info())
-             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
-
-
-
-def startMiningProcess(repoName, repo):
-    liveLogs('startTheProcess()', '')
-    # Extracting features from target repos for predictions
-    # Processing data for Git Repo.
-    try:
-         p1 = create_components(repoName, repo)
-         liveLogs('startMiningProcess/create_components() => p1', p1)
-        
-         p1_commits = get_latest_commits(p1[0], p1[1], p1[2])
-
-         storeCommitDataInDevRankerDirectory(p1_commits)
-        
-    except:
-         liveLogs("Exc Create Components", sys.exc_info())
-
-   
-def storeCommitDataInDevRankerDirectory(p1_commits):
-     outputFileLocation = outputFileDirectory + "/DevRanker"
-     # Checking for 'devRanker' Directory in Selected Directory
-     if not os.path.exists(outputFileLocation):
-            os.makedirs(outputFileLocation)
-     outputFileLocation = outputFileLocation + outputFileName + '.git.csv'
-     p1_commits.to_csv(outputFileLocation)         
-
-     liveLogs('storeCommitDataInDevRankerDirectory => p1_commits()', p1_commits)
-     sg.popup('Mining is done and File location is \n' + outputFileLocation )
+            # Create a filename from repo name. This is just the name. This is still not a file.
+            repoName = os.path.basename(gitDirectory)
+            temp_fileName = repoName+'.git.csv'
+            outputFileName = os.path.join(DevrankerDir, temp_fileName)
+            liveLogs("OutputFilename", outputFileName)
+            return repo, DevrankerDir, outputFileName, gitDirectory
+        except:
+            #liveLogs('exc 599', sys.exc_info())
+            sg.popup('Invalid Git Directory, Please choose valid Git Directory')
 
 
+
+# Main start of the program
 window = sg.Window('Dev Ranker', layout_main,
                    background_color='white', finalize=True)
 # event, values = window.Read()
 progressBar = window['_pb']
 progressBarText = window['_t_ProgressValue']
-inputDestinationDir = window['_i_DestDirectory']
+DestDirectory = window['_i_DestDirectory']
 dataFileLocation = window['_i_DFL']
 
 
@@ -533,18 +328,21 @@ while True:
         liveLogs('_i_GitDirectory', gitDirectory)
 
     elif event == '_i_StartMining':
-        validateDirectories()
-        updateProgressBar(0)
-        # startTheProcess()
+        repo, DevrankerDir, outputFileName, gitDirectory = validateDirectories()
+        #updateProgressBar(0)
+        try:
+            store_commit_data(outputFileName, gitDirectory)
+        except:
+            liveLogs("store_commit failed", '0')
 
     elif event == '_i_LiveLog':
         updateProgressBar(100)
         sg.popup('Live Log Clicked')
 
     elif event == '_i_DestDirectory':
-        outputFileDirectory = values['_i_DestDirectory']
+        DestDirectory = values['_i_DestDirectory']
         # dataFileLocation.update(outputFileLocation)
-        # liveLogs(outputFileDirectory, values['_i_DestDirectory'])
+        # liveLogs(DevrankerDir, values['_i_DestDirectory'])
 
     # STEP2 Related
     elif event == '_b_Inspect_DFL':
