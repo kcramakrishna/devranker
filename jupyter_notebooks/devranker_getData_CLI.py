@@ -1,12 +1,12 @@
 import PySimpleGUI as sg
 import os
+import sys
 import git
 from pydriller import RepositoryMining
 import multiprocessing as mp
-from datetime import datetime
 import pathlib
-import re
 import pandas
+import json
 
 ####################################################
 # Widths of Starting, Middle & Last Widgets
@@ -45,6 +45,8 @@ DestDirectory = ''
 # Variables for 'PySimpleGui'
 dateStart = ''
 dateEnd = ''
+
+
 ####################################################
 
 
@@ -53,31 +55,38 @@ def liveLogs(msg1, msg2):
     print(msg1, '::\n', msg2)
     print('*****************')
 
+
 ####################################################
 # Sub Layouts(Step1, Step2, Step3 & Step4) Preparation for Main Layout
 
 
 layout_step_1 = [
-    [sg.Text('Select the Location of Cloned Repo', text_color='black', background_color='white', size=(width_1, height_1)),
+    [sg.Text('Select the Location of Cloned Repo', text_color='black', background_color='white',
+             size=(width_1, height_1)),
      sg.Input(gitDirectory, key='_i_GitDirectory', enable_events=True, text_color='black',
               disabled=True, size=(width_2, height_2)),
-     sg.FolderBrowse('Browse', target='_i_GitDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'), button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
+     sg.FolderBrowse('Browse', target='_i_GitDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'),
+                     button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
 
-    [sg.Text('Select Destination Directory *', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
+    [sg.Text('Select Destination Directory *', background_color='white', text_color='black', border_width=2,
+             size=(width_1, height_1)),
      sg.Input(DestDirectory, key='_i_DestDirectory', enable_events=True, text_color='black',
               disabled=True, size=(width_2, height_2)),
-     sg.FolderBrowse('Browse', target='_i_DestDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'), button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
+     sg.FolderBrowse('Browse', target='_i_DestDirectory', pad=None, font=('MS Sans Serif', 10, 'bold'),
+                     button_color=('red', 'white'), key='_fb_browse', size=(width_3, height_3))],
 
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
      sg.Button('Start Mining', key='_i_StartMining', font=('MS Sans Serif',
-                                                           10, 'bold'), button_color=('blue', 'white'), size=(width_3, height_3)),
-     sg.Button('Live Log', key='_i_LiveLog', font=('MS Sans Serif', 10, 'bold'), button_color=('orange', 'white'), size=(width_3, height_3))],
+                                                           10, 'bold'), button_color=('blue', 'white'),
+               size=(width_3, height_3)),
+     sg.Button('Live Log', key='_i_LiveLog', font=('MS Sans Serif', 10, 'bold'), button_color=('orange', 'white'),
+               size=(width_3, height_3))],
 
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
      sg.ProgressBar(100, orientation='h', size=(20, 8), key='_pb'),
-     sg.Text('', background_color='white', key='_t_ProgressValue', font=('MS Sans Serif', 10, 'bold'), text_color='black', size=(width_3, height_3))]
+     sg.Text('', background_color='white', key='_t_ProgressValue', font=('MS Sans Serif', 10, 'bold'),
+             text_color='black', size=(width_3, height_3))]
 ]
-
 
 layout_step_2 = [
 
@@ -88,29 +97,27 @@ layout_step_2 = [
      sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('orange', 'white'), key='_b_Inspect_DFL', size=(width_3, height_3))],
 
-
     # ENCRYPT BUTTON
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
      # sg.Text('', background_color='white', text_color='black', size=(width_2-width_3, height_2-height_3)),
      sg.Button('Encrypt', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('blue', 'white'), key='_b_Encrypt', size=(width_3, height_3))],
 
-
     # ANONYMISED FILE
-    [sg.Text('Anonymised File Located at', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
+    [sg.Text('Anonymised File Located at', background_color='white', text_color='black', border_width=2,
+             size=(width_1, height_1)),
      sg.Input(key='_i_AFL', text_color='black',
               disabled=True, size=(width_2, height_2)),
      sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('orange', 'white'), key='_b_Inspect_AFL', size=(width_3, height_3))],
 
-
     # ANONYMISED DICTIONARY
-    [sg.Text('Anonymisation Dictionary Located at', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
+    [sg.Text('Anonymisation Dictionary Located at', background_color='white', text_color='black', border_width=2,
+             size=(width_1, height_1)),
      sg.Input(key='_i_ADL', text_color='black',
               disabled=True, size=(width_2, height_2)),
      sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('orange', 'white'), key='_b_Inspect_ADL', size=(width_3, height_3))],
-
 
     # GET PREDICTIONS BUTTON
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
@@ -119,14 +126,13 @@ layout_step_2 = [
                button_color=('blue', 'white'), key='_b_GetPredictions', size=(width_3, height_3))],
 ]
 
-
 layout_step_3 = [
-    [sg.Text('Anonymisation Predictions File', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
+    [sg.Text('Anonymisation Predictions File', background_color='white', text_color='black', border_width=2,
+             size=(width_1, height_1)),
      sg.Input(key='_i_APF', text_color='black',
               disabled=True, size=(width_2, height_2)),
      sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('orange', 'white'), key='_b_Inspect_APF', size=(width_3, height_3))],
-
 
     # GET PREDICTIONS BUTTON
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
@@ -135,14 +141,13 @@ layout_step_3 = [
                button_color=('blue', 'white'), key='_b_Decrypt', size=(width_3, height_3))],
 ]
 
-
 layout_step_4 = [
-    [sg.Text('De-Anonymisation Predictions File', background_color='white', text_color='black', border_width=2, size=(width_1, height_1)),
+    [sg.Text('De-Anonymisation Predictions File', background_color='white', text_color='black', border_width=2,
+             size=(width_1, height_1)),
      sg.Input(key='_i_DAPF', text_color='black',
               disabled=True, size=(width_2, height_2)),
      sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('orange', 'white'), key='_b_Inspects_DAPF', size=(width_3, height_3))],
-
 
     # GET PREDICTIONS BUTTON
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
@@ -150,7 +155,6 @@ layout_step_4 = [
      sg.Button('Show Charts', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('blue', 'white'), key='_b_Showcharts', size=(width_3, height_3))],
 ]
-
 
 ####################################################
 # MAIN LAYOUT WHICH IS GOING TO BE ADDED TO 'WINDOW'
@@ -176,10 +180,8 @@ layout_main = [
      sg.Column(layout_step_4, background_color='white')],
 ]
 
-####################################################
-#######  METHODS RELATED TO  'PySimpleGui'  ########
-####################################################
 
+#  METHODS RELATED TO  'PySimpleGui'
 
 def updateProgressBar(value):
     # progressBar.update_bar(value)
@@ -191,22 +193,21 @@ def updateProgressBar(value):
     # progressBarText.update(visible = True)
 
 
-####################################################
-#########  METHODS RELATED TO  DEVRANKER  ##########
-####################################################
+#  METHODS RELATED TO  DEVRANKER
+
 # TODO: RAVI -> ADD VALIDATION FOR ALL VARIABLES
 # Reading devrankerClientConfig.txt file data
 
 
-def process_commit(commit, doclist):
-
+def process_commit(commit, doc_list):
     for mod in commit.modifications:
-
         # Create a field 'file_ext' which is the file 'type'
-        file_ext = mod.new_path.apply(lambda x: pathlib.Path(str(x)).suffix).apply(lambda x: re.split(r"[^a-zA-Z0-9\s\++\_\-]", x)[-1])
+        # https://www.geeksforgeeks.org/how-to-get-file-extension-in-python/
+        file_ext = pathlib.Path(mod.new_path).suffix
 
         # For files without any extension, mark 'file_ext' as "NoExt"
-        file_ext = file_ext.replace(r'^\s*$', 'NoExt', regex=True)
+        # https://stackoverflow.com/questions/7338501/python-assign-value-if-none-exists
+        file_ext = file_ext or 'NoExt'
 
         mod_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
                     'message': commit.msg, 'authored_date': commit.author_date,
@@ -238,15 +239,10 @@ def process_commit(commit, doclist):
 
         # loading each commit tuple into the list
         # List appending is threadsafe: https://stackoverflow.com/a/18568017
-        doclist.append(mod_data)
+        doc_list.append(mod_data)
 
 
-def store_commit_data(outputFileName, gitDirectory):
-
-    if DEBUG >= 1:
-        store_start = datetime.now()
-        print('starting store_commit', store_start)
-
+def store_commit_data(git_directory, devranker_dir, output_file_name):
     # Creating empty lists for carrying commit data
     doclist = []
 
@@ -257,21 +253,26 @@ def store_commit_data(outputFileName, gitDirectory):
     # kc - progress bar needs to use the commit number from here or from 'process_commit'
     # https://dzone.com/articles/shared-counter-python%E2%80%99s
     [pool.apply_async(process_commit(commit, doclist)) for commit in
-     RepositoryMining(gitDirectory).traverse_commits()]
+     RepositoryMining(git_directory).traverse_commits()]
 
     # Close Multiprocessing pool
     pool.close()
     pool.join()
 
     # Write data to file
-    df = pandas.read_json(doclist)
-    df.to_csv(outputFileName)
-    sg.popup('Mining is done and File location is \n' + outputFileName)
+    temp_file = os.path.join(devranker_dir, 'mod_data.json')
+    with open(temp_file, 'w') as temp_out_file:
+        json.dump(doclist, temp_out_file)
 
-    if DEBUG >= 1:
-        store_end = datetime.now()
-        print('exiting store_commit', store_end)
-        print('time taken by store_commit', (store_end - store_start))
+    # Use pandas to read this since manipulation is easy
+    df = pandas.read_json(temp_file)
+    df.to_csv(output_file_name)
+
+    # Remove the temp file
+    os.remove(temp_file)
+
+    # Inform user that mining is complete
+    sg.popup('Mining is done and File location is \n' + output_file_name)
 
 
 def validateDirectories():
@@ -285,20 +286,19 @@ def validateDirectories():
 
             # Create 'Devranker' working Directory
             # https://docs.python.org/3/library/os.path.html
-            DevrankerDir = os.path.join(DestDirectory, 'Devranker')
-            if not os.path.exists(DevrankerDir):
-                os.mkdir(DevrankerDir)
+            devranker_dir = os.path.join(DestDirectory, 'Devranker')
+            if not os.path.exists(devranker_dir):
+                os.mkdir(devranker_dir)
 
             # Create a filename from repo name. This is just the name. This is still not a file.
             repoName = os.path.basename(gitDirectory)
-            temp_fileName = repoName+'.git.csv'
-            outputFileName = os.path.join(DevrankerDir, temp_fileName)
+            temp_fileName = repoName + '.git.csv'
+            outputFileName = os.path.join(devranker_dir, temp_fileName)
             liveLogs("OutputFilename", outputFileName)
-            return repo, DevrankerDir, outputFileName, gitDirectory
+            return repo, devranker_dir, outputFileName, gitDirectory
         except:
-            #liveLogs('exc 599', sys.exc_info())
+            liveLogs('exc 599', sys.exc_info())
             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
-
 
 
 # Main start of the program
@@ -310,10 +310,8 @@ progressBarText = window['_t_ProgressValue']
 DestDirectory = window['_i_DestDirectory']
 dataFileLocation = window['_i_DFL']
 
+# HANDLING ALL EVENTS
 
-####################################################
-######          HANDLING ALL EVENTS          #######
-####################################################
 while True:
 
     event, values = window.Read()
@@ -329,11 +327,12 @@ while True:
 
     elif event == '_i_StartMining':
         repo, DevrankerDir, outputFileName, gitDirectory = validateDirectories()
-        #updateProgressBar(0)
+        # updateProgressBar(0)
         try:
-            store_commit_data(outputFileName, gitDirectory)
+            store_commit_data(gitDirectory, DevrankerDir, outputFileName)
         except:
             liveLogs("store_commit failed", '0')
+            continue
 
     elif event == '_i_LiveLog':
         updateProgressBar(100)
@@ -342,7 +341,7 @@ while True:
     elif event == '_i_DestDirectory':
         DestDirectory = values['_i_DestDirectory']
         # dataFileLocation.update(outputFileLocation)
-        # liveLogs(DevrankerDir, values['_i_DestDirectory'])
+        # liveLogs(devranker_dir, values['_i_DestDirectory'])
 
     # STEP2 Related
     elif event == '_b_Inspect_DFL':
