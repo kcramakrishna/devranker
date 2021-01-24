@@ -7,6 +7,7 @@ import multiprocessing as mp
 import pathlib
 import pandas
 import json
+import logging
 
 ####################################################
 # Widths of Starting, Middle & Last Widgets
@@ -41,22 +42,11 @@ DevrankerDir = ''
 gitDirectory = ''
 DestDirectory = ''
 
-####################################################
 # Variables for 'PySimpleGui'
 dateStart = ''
 dateEnd = ''
 
 
-####################################################
-
-
-def liveLogs(msg1, msg2):
-    print('\n\n*****************')
-    print(msg1, '::\n', msg2)
-    print('*****************')
-
-
-####################################################
 # Sub Layouts(Step1, Step2, Step3 & Step4) Preparation for Main Layout
 
 
@@ -300,10 +290,10 @@ def validate_directories():
             repo_name = os.path.basename(gitDirectory)
             temp_file_name = repo_name + '.git.csv'
             output_file_name = os.path.join(devranker_dir, temp_file_name)
-            liveLogs("OutputFilename", output_file_name)
+            logging.info("OutputFilename", output_file_name)
             return repo, devranker_dir, output_file_name, gitDirectory
         except:
-            liveLogs('exc 599', sys.exc_info())
+            print('exc 599', sys.exc_info())
             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
 
 
@@ -329,7 +319,7 @@ while True:
 
     elif event == '_i_GitDirectory':
         gitDirectory = values['_i_GitDirectory']
-        liveLogs('_i_GitDirectory', gitDirectory)
+        logging.info('_i_GitDirectory', gitDirectory)
 
     elif event == '_i_StartMining':
         repo, DevrankerDir, outputFileName, gitDirectory = validate_directories()
@@ -337,7 +327,7 @@ while True:
         try:
             store_commit_data(gitDirectory, DevrankerDir, outputFileName)
         except:
-            liveLogs("store_commit failed", '0')
+            logging.info("store_commit failed", '0')
             continue
 
     elif event == '_i_LiveLog':
