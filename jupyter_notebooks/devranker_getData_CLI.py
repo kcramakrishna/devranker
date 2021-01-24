@@ -201,13 +201,16 @@ def updateProgressBar(value):
 
 def process_commit(commit, doc_list):
     for mod in commit.modifications:
+
         # Create a field 'file_ext' which is the file 'type'
         # https://www.geeksforgeeks.org/how-to-get-file-extension-in-python/
-        file_ext = pathlib.Path(mod.new_path).suffix
-
-        # For files without any extension, mark 'file_ext' as "NoExt"
-        # https://stackoverflow.com/questions/7338501/python-assign-value-if-none-exists
-        file_ext = file_ext or 'NoExt'
+        # 'pathlib.Path' gives extension 'None' for all '.' files i.e. .bashrc etc.
+        #     it also gives an exception in some cases. We need to handle that too.
+        try:
+            file_ext = pathlib.Path(mod.filename).suffix or 'NoExt'
+        except:
+            file_ext = file_ext or 'NoExt'
+            continue
 
         mod_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
                     'message': commit.msg, 'authored_date': commit.author_date,
@@ -259,12 +262,18 @@ def store_commit_data(git_directory, devranker_dir, output_file_name):
     pool.close()
     pool.join()
 
+    # We have data in json format but we need output as csv.
+    # There are many approaches to doing this including using 'dictionaries and stuff.
+    # But the easiest way is to write json to file using json.dump and using pandas to read json file.
     # Write data to file
     temp_file = os.path.join(devranker_dir, 'mod_data.json')
     with open(temp_file, 'w') as temp_out_file:
-        json.dump(doclist, temp_out_file)
+        # json.dump cannot handle python datetime object. We should convert this object to 'str'
+        # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable
+        # https://code-maven.com/serialize-datetime-object-as-json-in-python
+        json.dump(doclist, temp_out_file, default=str)
 
-    # Use pandas to read this since manipulation is easy
+    # Use pandas to read json and write to csv.
     df = pandas.read_json(temp_file)
     df.to_csv(output_file_name)
 
