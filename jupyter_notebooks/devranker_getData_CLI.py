@@ -322,8 +322,11 @@ while True:
         logging.info('_i_GitDirectory', gitDirectory)
 
     elif event == '_i_StartMining':
-        repo, DevrankerDir, outputFileName, gitDirectory = validate_directories()
-        # update_progress_bar(0)
+        try:
+            repo, DevrankerDir, outputFileName, gitDirectory = validate_directories()
+        except:
+            # Need to clear gitDirectory and DestDir here
+            continue
         try:
             store_commit_data(gitDirectory, DevrankerDir, outputFileName)
         except:
