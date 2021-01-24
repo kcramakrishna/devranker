@@ -183,7 +183,7 @@ layout_main = [
 
 #  METHODS RELATED TO  'PySimpleGui'
 
-def updateProgressBar(value):
+def update_progress_bar(value):
     # progressBar.update_bar(value)
     # progressBarText.update(str(value) + " % ")
     pass
@@ -206,11 +206,7 @@ def process_commit(commit, doc_list):
         # https://www.geeksforgeeks.org/how-to-get-file-extension-in-python/
         # 'pathlib.Path' gives extension 'None' for all '.' files i.e. .bashrc etc.
         #     it also gives an exception in some cases. We need to handle that too.
-        try:
-            file_ext = pathlib.Path(mod.filename).suffix or 'NoExt'
-        except:
-            file_ext = file_ext or 'NoExt'
-            continue
+        file_ext = pathlib.Path(mod.filename).suffix or 'NoExt'
 
         mod_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
                     'message': commit.msg, 'authored_date': commit.author_date,
@@ -263,9 +259,10 @@ def store_commit_data(git_directory, devranker_dir, output_file_name):
     pool.join()
 
     # We have data in json format but we need output as csv.
-    # There are many approaches to doing this including using 'dictionaries and stuff.
+    # There are many approaches to doing this including using dictionaries and stuff.
     # But the easiest way is to write json to file using json.dump and using pandas to read json file.
-    # Write data to file
+    # Write data to temp file since pandas.read_json expects file. We can probably optimise without having to
+    #     create a new file.
     temp_file = os.path.join(devranker_dir, 'mod_data.json')
     with open(temp_file, 'w') as temp_out_file:
         # json.dump cannot handle python datetime object. We should convert this object to 'str'
@@ -284,7 +281,7 @@ def store_commit_data(git_directory, devranker_dir, output_file_name):
     sg.popup('Mining is done and File location is \n' + output_file_name)
 
 
-def validateDirectories():
+def validate_directories():
     if gitDirectory == '':
         sg.popup('Please Select Git Directory')
     elif DestDirectory == '':
@@ -300,11 +297,11 @@ def validateDirectories():
                 os.mkdir(devranker_dir)
 
             # Create a filename from repo name. This is just the name. This is still not a file.
-            repoName = os.path.basename(gitDirectory)
-            temp_fileName = repoName + '.git.csv'
-            outputFileName = os.path.join(devranker_dir, temp_fileName)
-            liveLogs("OutputFilename", outputFileName)
-            return repo, devranker_dir, outputFileName, gitDirectory
+            repo_name = os.path.basename(gitDirectory)
+            temp_file_name = repo_name + '.git.csv'
+            output_file_name = os.path.join(devranker_dir, temp_file_name)
+            liveLogs("OutputFilename", output_file_name)
+            return repo, devranker_dir, output_file_name, gitDirectory
         except:
             liveLogs('exc 599', sys.exc_info())
             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
@@ -335,8 +332,8 @@ while True:
         liveLogs('_i_GitDirectory', gitDirectory)
 
     elif event == '_i_StartMining':
-        repo, DevrankerDir, outputFileName, gitDirectory = validateDirectories()
-        # updateProgressBar(0)
+        repo, DevrankerDir, outputFileName, gitDirectory = validate_directories()
+        # update_progress_bar(0)
         try:
             store_commit_data(gitDirectory, DevrankerDir, outputFileName)
         except:
@@ -344,7 +341,7 @@ while True:
             continue
 
     elif event == '_i_LiveLog':
-        updateProgressBar(100)
+        update_progress_bar(100)
         sg.popup('Live Log Clicked')
 
     elif event == '_i_DestDirectory':
