@@ -279,27 +279,16 @@ def validate_directories():
     else:
         try:
             repo = git.Repo(gitDirectory)
-
-            # Create 'Devranker' working Directory
-            # https://docs.python.org/3/library/os.path.html
-            devranker_dir = os.path.join(DestDirectory, 'Devranker')
-            if not os.path.exists(devranker_dir):
-                os.mkdir(devranker_dir)
-
-            # Create a filename from repo name. This is just the name. This is still not a file.
-            repo_name = os.path.basename(gitDirectory)
-            temp_file_name = repo_name + '.git.csv'
-            output_file_name = os.path.join(devranker_dir, temp_file_name)
-            logging.info("OutputFilename", output_file_name)
-            return repo, devranker_dir, output_file_name, gitDirectory
+            return True
         except:
             print('exc 599', sys.exc_info())
             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
+            return False
 
 
 # Main start of the program
-window = sg.Window('Dev Ranker', layout_main,
-                   background_color='white', finalize=True)
+window = sg.Window('Dev Ranker', layout_main, background_color='white', finalize=True)
+
 # event, values = window.Read()
 progressBar = window['_pb']
 progressBarText = window['_t_ProgressValue']
@@ -320,15 +309,33 @@ while True:
     elif event == '_i_GitDirectory':
         gitDirectory = values['_i_GitDirectory']
         logging.info('_i_GitDirectory', gitDirectory)
+        # Verify if this is a gitRepo right here.
+        try:
+            repo = git.Repo(gitDirectory)
+        except:
+            print('exc 599', sys.exc_info())
+            sg.popup('Invalid Git Directory, Please choose valid Git Directory')
+            # kc Need to clear gitDirectory
+            continue
 
     elif event == '_i_StartMining':
-        try:
-            repo, DevrankerDir, outputFileName, gitDirectory = validate_directories()
-        except:
-            # Need to clear gitDirectory and DestDir here
+        if validate_directories():
+            # https://docs.python.org/3/library/os.path.html
+            devranker_dir = os.path.join(DestDirectory, 'Devranker')
+            if not os.path.exists(devranker_dir):
+                os.mkdir(devranker_dir)
+                sg.popup('Created working Directory: ', devranker_dir)
+
+            # Create a filename from repo name. This is just the name. This is still not a file.
+            repo_name = os.path.basename(gitDirectory)
+            temp_file_name = repo_name + '.git.csv'
+            output_file_name = os.path.join(devranker_dir, temp_file_name)
+            logging.info("OutputFilename", output_file_name)
+        else:
+            # Need to clear gitDirectory and DestDir here or at respective places.
             continue
         try:
-            store_commit_data(gitDirectory, DevrankerDir, outputFileName)
+            store_commit_data(gitDirectory, devranker_dir, output_file_name)
         except:
             logging.info("store_commit failed", '0')
             continue
