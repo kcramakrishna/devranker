@@ -12,7 +12,6 @@ import more_itertools
 import pickle
 import hashlib
 
-
 logging.basicConfig(level=logging.DEBUG)
 
 # Widths of Starting, Middle & Last Widgets
@@ -45,7 +44,6 @@ DEBUG = 0
 devranker_dir = ''
 gitDirectory = ''
 DestDirectory = ''
-
 total_commits_count = 0
 
 # Sub Layouts(Step1, Step2, Step3 & Step4) will be added to 'layout_main'
@@ -85,33 +83,33 @@ layout_step_2 = [
     [sg.Text('Data file location at', text_color='black', background_color='white', size=(width_1, height_1)),
      sg.Input(key='_i_DFL', background_color='white',
               disabled=True, text_color='black', size=(width_2, height_2)),
-    #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
-    #            button_color=('orange', 'white'), key='_b_Inspect_DFL', size=(width_3, height_3))
-               ],
+     #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     #            button_color=('orange', 'white'), key='_b_Inspect_DFL', size=(width_3, height_3))
+     ],
 
     # 'Encrypt' Button
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
      # sg.Text('', background_color='white', text_color='black', size=(width_2-width_3, height_2-height_3)),
-     sg.Button('Anonymise', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     sg.Button('Anonymize', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('blue', 'white'), key='_b_Encrypt', size=(width_3, height_3))],
 
-    # Anonymised File
-    [sg.Text('Anonymisation File Located at', background_color='white', text_color='black', border_width=2,
+    # Anonymized File
+    [sg.Text('Anonymization File Located at', background_color='white', text_color='black', border_width=2,
              size=(width_1, height_1)),
      sg.Input(key='_i_AFL', text_color='black',
               disabled=True, size=(width_2, height_2)),
-    #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
-    #            button_color=('orange', 'white'), key='_b_Inspect_AFL', size=(width_3, height_3))
-               ],
+     #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     #            button_color=('orange', 'white'), key='_b_Inspect_AFL', size=(width_3, height_3))
+     ],
 
-    # Anonymised Dictionary
-    [sg.Text('Anonymisation Dictionary Located at', background_color='white', text_color='black', border_width=2,
+    # Anonymized Dictionary
+    [sg.Text('Anonymization Dictionary Located at', background_color='white', text_color='black', border_width=2,
              size=(width_1, height_1)),
      sg.Input(key='_i_ADL', text_color='black',
               disabled=True, size=(width_2, height_2)),
-    #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
-    #            button_color=('orange', 'white'), key='_b_Inspect_ADL', size=(width_3, height_3))
-               ],
+     #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     #            button_color=('orange', 'white'), key='_b_Inspect_ADL', size=(width_3, height_3))
+     ],
 
     # 'Get Predictions' Button
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
@@ -121,29 +119,29 @@ layout_step_2 = [
 ]
 
 layout_step_3 = [
-    [sg.Text('Anonymisation Predictions File', background_color='white', text_color='black', border_width=2,
+    [sg.Text('Anonymization Predictions File', background_color='white', text_color='black', border_width=2,
              size=(width_1, height_1)),
      sg.Input(key='_i_APF', text_color='black',
               disabled=True, size=(width_2, height_2)),
-    #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
-    #            button_color=('orange', 'white'), key='_b_Inspect_APF', size=(width_3, height_3))
-               ],
+     #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     #            button_color=('orange', 'white'), key='_b_Inspect_APF', size=(width_3, height_3))
+     ],
 
     # 'Decrypt' Button
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
      # sg.Text('', background_color='white', text_color='black', size=(width_2-width_3, height_2-height_3)),
-     sg.Button('De Anonymise', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     sg.Button('De Anonymize', pad=None, font=('MS Sans Serif', 10, 'bold'),
                button_color=('blue', 'white'), key='_b_Decrypt', size=(width_3, height_3))],
 ]
 
 layout_step_4 = [
-    [sg.Text('De-Anonymisation Predictions File', background_color='white', text_color='black', border_width=2,
+    [sg.Text('De-Anonymization Predictions File', background_color='white', text_color='black', border_width=2,
              size=(width_1, height_1)),
      sg.Input(key='_i_DAPF', text_color='black',
               disabled=True, size=(width_2, height_2)),
-    #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
-    #            button_color=('orange', 'white'), key='_b_Inspects_DAPF', size=(width_3, height_3))
-    ],
+     #  sg.Button('Inspect', pad=None, font=('MS Sans Serif', 10, 'bold'),
+     #            button_color=('orange', 'white'), key='_b_Inspects_DAPF', size=(width_3, height_3))
+     ],
 
     # GET PREDICTIONS BUTTON
     [sg.Text('', background_color='white', text_color='black', size=(width_1, height_1)),
@@ -177,30 +175,33 @@ layout_main = [
 
 
 ##########################################################
-##################   Setets & Getters   ##################
+##################   Setters & Getters   ##################
 ##########################################################
 # devranker_dir
 def set_devranker_dir():
     global devranker_dir
-    #Ref: https://docs.python.org/3/library/os.path.html
+    # Ref: https://docs.python.org/3/library/os.path.html
     devranker_dir = os.path.join(DestDirectory, 'Devranker')
     if not os.path.exists(devranker_dir):
         os.mkdir(devranker_dir)
         sg.popup('Created working Directory: ', devranker_dir)
     logging.info("set_devranker_dir() devranker_dir = ", devranker_dir)
 
+
 def get_devranker_dir():
     return devranker_dir
 
 
-# output_file_name 
+# output_file_name
 def set_output_file_path():
     global output_file_name
     output_file_name = os.path.join(get_devranker_dir(), get_target_repo_raw_data_file_name())
     logging.info("set_output_filename() output_file_name = ", output_file_name)
 
+
 def get_output_file_path():
     return output_file_name
+
 
 # '.git.csv'
 def get_target_repo_raw_data_file_name():
@@ -211,14 +212,18 @@ def get_target_repo_raw_data_file_name():
 def set_dest_directory_path(path):
     global DestDirectory
     DestDirectory = path
+
+
 def get_dest_directory_path():
     # global DestDirectory
     return DestDirectory
+
 
 # gitDirectory
 def set_git_directory_path(path):
     global gitDirectory
     gitDirectory = path
+
 
 def get_git_directory_path():
     return gitDirectory
@@ -228,27 +233,30 @@ def get_git_directory_path():
 def get_repo_name():
     return os.path.basename(get_git_directory_path())
 
-# anonymised 
-def get_anonymised_file_path():
-    # return get_devranker_dir()+'/anonymised_'+get_target_repo_raw_data_file_name()
-    return os.path.join(get_devranker_dir(), 'anonymised_'+get_target_repo_raw_data_file_name())
 
-# anonymised dict
+# anonymized
+def get_anonymized_file_path():
+    # return get_devranker_dir()+'/anonymized_'+get_target_repo_raw_data_file_name()
+    return os.path.join(get_devranker_dir(), 'anonymized_' + get_target_repo_raw_data_file_name())
+
+
+# anonymized dict
 def get_email_hash_dict_file_path():
-    return get_output_file_path() +'.email_dict.pickle'
+    return get_output_file_path() + '.email_dict.pickle'
+
 
 # predictions dir
 def get_predictions_directory_path():
     return get_devranker_dir()
     # return os.path.join(get_dest_directory_path(), 'predictions')
 
-def get_anonymised_predictions_file_path():
-    return os.path.join(get_devranker_dir(), 'scores_anonymised_elasticray.git.csv')
+
+def get_anonymized_predictions_file_path():
+    return os.path.join(get_devranker_dir(), 'scores_anonymized_elasticray.git.csv')
 
 
 # def get_dev_predictions_file():
 #     return os.path.join(get_predictions_directory_path(), 'dev_scores_'+get_target_repo_raw_data_file_name())
-
 
 
 def validate_directories():
@@ -264,6 +272,7 @@ def validate_directories():
             print('exc @ validate_directories', sys.exc_info())
             sg.popup('Invalid Git Directory, Please choose valid Git Directory')
             return False
+
 
 # Methods related to 'DevRanker'
 def process_commit(commit, doc_list, completed_commits):
@@ -313,7 +322,7 @@ def process_commit(commit, doc_list, completed_commits):
 def store_commit_data():
     # Creating empty lists for carrying commit data
     doclist = []
-    # To update progress bar, using list here because it's thread-safe
+    # Using list to update progress bar because it's thread-safe
     completed_commits = []
 
     # Create Multithreading pool to use full CPU
@@ -321,14 +330,12 @@ def store_commit_data():
     pool = mp.Pool(mp.cpu_count())
 
     # If the Repo has just been cloned, the program will traverse the whole Repo
-    # kc - progress bar needs to use the commit number from here or from 'process_commit'
     # https://dzone.com/articles/shared-counter-python%E2%80%99s
-
     commits = RepositoryMining(get_git_directory_path()).traverse_commits()
-
     # TODO: RAVI -> Move this into SETTERS/GETTERS
     global total_commits_count
     # 'more_itertools' used here to find commits count as 'commits' is Iterable
+    # Note: ilen(commits) consumes the iterable 'commits'
     total_commits_count = more_itertools.ilen(commits)
 
     [pool.apply_async(process_commit(commit, doclist, completed_commits)) for commit in
@@ -360,51 +367,51 @@ def store_commit_data():
     sg.popup('Mining is done and File location is \n' + get_output_file_path())
 
 
-def anonymise():
+def anonymize():
     target_repo_commits = pandas.read_csv(get_output_file_path())
-    
-    for i in range(len(target_repo_commits)) : 
-         # Encrypt Author
-         clear_text = target_repo_commits.loc[i, 'Author']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'Author_encrypted'] = hashed
 
-         # Encrypt Email    
-         clear_text = target_repo_commits.loc[i, 'Email']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'Email_encrypted'] = hashed
-         if DEBUG >=1:
+    for i in range(len(target_repo_commits)):
+        # Encrypt Author
+        clear_text = target_repo_commits.loc[i, 'Author']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'Author_encrypted'] = hashed
+
+        # Encrypt Email
+        clear_text = target_repo_commits.loc[i, 'Email']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'Email_encrypted'] = hashed
+        if DEBUG >= 1:
             print('hash, email: ', hashed, clear_text)
-        
+
         # Encrypt Committer
-         clear_text = target_repo_commits.loc[i, 'Committer']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'Committer_encrypted'] = hashed
+        clear_text = target_repo_commits.loc[i, 'Committer']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'Committer_encrypted'] = hashed
 
-         # Encrypt file_name
-         clear_text = target_repo_commits.loc[i, 'file_name']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'file_name_encrypted'] = hashed
+        # Encrypt file_name
+        clear_text = target_repo_commits.loc[i, 'file_name']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'file_name_encrypted'] = hashed
 
-         # Encrypt file_old_path
-         clear_text = target_repo_commits.loc[i, 'file_old_path']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'file_old_path_encrypted'] = hashed
+        # Encrypt file_old_path
+        clear_text = target_repo_commits.loc[i, 'file_old_path']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'file_old_path_encrypted'] = hashed
 
-         # Encrypt file_new_path
-         clear_text = target_repo_commits.loc[i, 'file_new_path']
-         hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
-         target_repo_commits.loc[i, 'file_new_path_encrypted'] = hashed
+        # Encrypt file_new_path
+        clear_text = target_repo_commits.loc[i, 'file_new_path']
+        hashed = hashlib.sha256(str(clear_text).encode()).hexdigest()
+        target_repo_commits.loc[i, 'file_new_path_encrypted'] = hashed
 
-    # Create a dictionary for email-ids. We need this later to decrypt the predicitions file.
+    # Create a dictionary for email-ids. We need this later to decrypt the predictions file.
     # We can ignore the other encrypted fileds for now.
     email_hash_dict = {}
     for author_email in target_repo_commits['Email'].unique().tolist():
-         # First hash the email
-         hashed_email = hashlib.sha256(str(author_email).encode()).hexdigest()
-         # Now add the hash and corresponding email to dictionary 
-         email_hash_dict[hashed_email] = author_email
- 
+        # First hash the email
+        hashed_email = hashlib.sha256(str(author_email).encode()).hexdigest()
+        # Now add the hash and corresponding email to dictionary
+        email_hash_dict[hashed_email] = author_email
+
     # Pickle this dictionary and write to file for future use
     email_hash_dict_file = get_email_hash_dict_file_path()
     email_hash_dict_file_handler = open(email_hash_dict_file, 'wb')
@@ -412,23 +419,21 @@ def anonymise():
     email_hash_dict_file_handler.close()
 
     # Drop the clear text columns 
-    target_repo_commits.drop(columns = \
-            ['Author', 'Email', 'Committer', 'file_name', 'file_old_path', 'file_new_path'], inplace=True)
+    target_repo_commits.drop(columns=['Author', 'Email', 'Committer', 'file_name', 'file_old_path', 'file_new_path'],
+                             inplace=True)
 
     # Write it out to the file. This is the file that is to be uploaded for scoring and prediction.
+    target_repo_commits.to_csv(get_anonymized_file_path())
+    display_anonymized_file_path()
+    display_anonymized_dict_file_path()
 
-    target_repo_commits.to_csv(get_anonymised_file_path())
-
-    display_anonymised_file_path()
-    display_anonymised_dict_file_path()
-
-    sg.popup('Anonymise is done.', '\n\nAnonymise File location:\n' + get_anonymised_file_path(),
-     '\n\nAnonymise File Dictionary location:\n'+get_email_hash_dict_file_path())
+    sg.popup('Anonymize is done.', '\n\nAnonymize File location:\n' + get_anonymized_file_path(),
+             '\n\nAnonymize File Dictionary location:\n' + get_email_hash_dict_file_path())
 
 
-def de_anonymise():
+def de_anonymize():
     # Read the file to be decrypted
-    anonymised_predictions_data = pandas.read_csv(get_anonymised_predictions_file_path())
+    anonymized_predictions_data = pandas.read_csv(get_anonymized_predictions_file_path())
     target_repo_commits = pandas.read_csv(get_output_file_path())
     # TODO: KC - Add code here to check that shapes of these 2 data frames match.
     #
@@ -437,19 +442,20 @@ def de_anonymise():
     email_hash_dict_file_handler = open(get_email_hash_dict_file_path(), 'rb')
     email_hash_dict = pickle.load(email_hash_dict_file_handler)
 
-    # Put back the original values for the anonymised data
-    dev_predictions_file_path = os.path.join(get_predictions_directory_path(), 'dev_scores_' + get_target_repo_raw_data_file_name())
+    # Put back the original values for the anonymized data
+    dev_predictions_file_path = os.path.join(get_predictions_directory_path(),
+                                             'dev_scores_' + get_target_repo_raw_data_file_name())
 
-    predictions_data = anonymised_predictions_data.copy()
+    predictions_data = anonymized_predictions_data.copy()
 
     # Iterate through each row to put back the emails
-    for i in range(len(predictions_data)): 
-        hashed_email = anonymised_predictions_data.loc[i, 'Email_encrypted']
+    for i in range(len(predictions_data)):
+        hashed_email = anonymized_predictions_data.loc[i, 'Email_encrypted']
         predictions_data.loc[i, 'Email'] = email_hash_dict.get(hashed_email)
 
     predictions_data.to_csv(dev_predictions_file_path)
-    display_de_anonymised_predictions_file_path(dev_predictions_file_path)
-    sg.popup('De Anonymising is done and File location is', dev_predictions_file_path)
+    display_de_anonymized_predictions_file_path(dev_predictions_file_path)
+    sg.popup('De Anonymizing is done and File location is', dev_predictions_file_path)
 
 
 #  Methods Related to 'PySimpleGui'
@@ -469,17 +475,21 @@ def update_progress_bar(completed_commits):
     else:
         progressBarText.update(visible=True)
 
-def display_anonymised_file_path():
-    w_i_anonymised_file.update(get_anonymised_file_path())
+
+def display_anonymized_file_path():
+    w_i_anonymized_file.update(get_anonymized_file_path())
+
 
 def display_data_file_location_path():
     w_i_data_file_location.update(get_output_file_path())
 
-def display_anonymised_dict_file_path():
-    w_i_anonymised_dict_file.update(get_email_hash_dict_file_path())
 
-def display_de_anonymised_predictions_file_path(path):
-    w_i_de_anonymised_file.update(path)
+def display_anonymized_dict_file_path():
+    w_i_anonymized_dict_file.update(get_email_hash_dict_file_path())
+
+
+def display_de_anonymized_predictions_file_path(path):
+    w_i_de_anonymized_file.update(path)
 
 
 def start_gui_Window():
@@ -487,10 +497,10 @@ def start_gui_Window():
     global progressBarText
     global inputDestDir
     global dataFileLocation
-    global w_i_anonymised_file
-    global w_i_anonymised_dict_file
+    global w_i_anonymized_file
+    global w_i_anonymized_dict_file
     global w_i_data_file_location
-    global w_i_de_anonymised_file
+    global w_i_de_anonymized_file
 
     global gitDirectory
     global DestDirectory
@@ -501,10 +511,10 @@ def start_gui_Window():
     progressBarText = window['_t_ProgressValue']
     inputDestDir = window['_i_DestDirectory']
     dataFileLocation = window['_i_DFL']
-    w_i_anonymised_file = window['_i_AFL']
-    w_i_anonymised_dict_file = window['_i_ADL']
+    w_i_anonymized_file = window['_i_AFL']
+    w_i_anonymized_dict_file = window['_i_ADL']
     w_i_data_file_location = window['_i_DFL']
-    w_i_de_anonymised_file = window['_i_DAPF']
+    w_i_de_anonymized_file = window['_i_DAPF']
 
     while True:
         event, values = window.Read()
@@ -527,7 +537,7 @@ def start_gui_Window():
                 continue
 
         elif event == '_i_StartMining':
-            if  validate_directories():
+            if validate_directories():
                 set_devranker_dir()
                 set_output_file_path()
             else:
@@ -558,14 +568,14 @@ def start_gui_Window():
             pass
 
         elif event == '_b_Encrypt':
-            anonymise()
+            anonymize()
 
         # Step-3 Related
         elif event == '_b_Inspect_APF':
             pass
 
         elif event == '_b_Decrypt':
-            de_anonymise()
+            de_anonymize()
 
 
         # Step-4 Related

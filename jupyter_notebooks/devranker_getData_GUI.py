@@ -169,7 +169,6 @@ layout_main = [
 
 #  METHODS RELATED TO  'PySimpleGui'
 def update_progress_bar(completed_commits):
-    # lock.acquire()
 
     len_completed_commits = len(completed_commits)
 
@@ -183,8 +182,6 @@ def update_progress_bar(completed_commits):
         progressBar.update_bar(0, 0)
     else:
         progressBarText.update(visible=True)
-
-    # lock.release()
 
 
 def process_commit(commit, doc_list, completed_commits):
@@ -242,14 +239,12 @@ def store_commit_data(git_directory, devranker_dir, output_file_name):
     pool = mp.Pool(mp.cpu_count())
 
     # If the Repo has just been cloned, the program will traverse the whole Repo
-    # kc - progress bar needs to use the commit number from here or from 'process_commit'
     # https://dzone.com/articles/shared-counter-python%E2%80%99s
-
     commits = RepositoryMining(git_directory).traverse_commits()
-
+    # Get the number of commits
     global total_commits_count
     # 'more_itertools' used here to find commits count as 'commits' is Iterable
-    total_commits_count = more_itertools.ilen(commits)
+    total_commits_count = more_itertools.ilen(commits)   # Note: ilen(commits) consumes the iterable 'commits'
 
     [pool.apply_async(process_commit(commit, doclist, completed_commits)) for commit in
      RepositoryMining(git_directory).traverse_commits()]
