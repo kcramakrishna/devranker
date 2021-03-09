@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Devranker - Electron with Chart.js</title>
+
+
+    <select name="emails" id="select_emails" multiple="multiple">
+      <option value="All" selected="selected">All Authors </option>
+    </select>
+    <select name="languages" id="select_languages">
+      <option value="" selected="selected">Select Language</option>
+    </select>
+    <input type="month" id="input_from_month_and_year" name="from_month" value="">
+    <input type="month" id="input_to_month_and_year" name="to_month" value="">
+
+    <input id="btn" type="button" value=" > " ></input>
+    <style></style>
+  </head>
+  <body>
+    <div>
+      <canvas id="chart_area" width="400" height="400"></canvas>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+      <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
+      <script src="../js/renderer.js"></script>
+    </div>
+  </body>
+</html>

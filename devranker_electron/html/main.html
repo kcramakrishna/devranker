@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Devranker - Electron with Chart.js</title>
+
+    <!-- <select name="emails" id="select_emails" multiple="multiple">
+      <option value="All" selected="selected">All Authors </option>
+    </select>
+    <select name="languages" id="select_languages">
+      <option value="" selected="selected">Select Language</option>
+    </select> -->
+    <!-- <input type="month" id="input_from_month_and_year" name="from_month" value="">
+    <input type="month" id="input_to_month_and_year" name="to_month" value="">
+
+    <input id="btn" type="button" value=" > " ></input> -->
+    <!-- <style></style> -->
+  </head>
+  <body>
+    <div id="container">
+      <!-- ######################### -->
+      <!--          Step-1         -->
+      <!-- ######################### -->
+      <div class="step_1">
+        <div class="status_container">
+          <div>Step-1</div>
+          <div class="status_div"></div>
+        </div>
+
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Select the Location of Cloned Repo</div>
+            <div class="centre" id="cln_repo"></div>
+            <input
+              class="right"
+              id="btn_browse_cln_repo"
+              value="Browse"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div">
+            <div class="left">Select Destination Directory</div>
+            <div class="centre" id="dest_dir"></div>
+            <input
+              class="right"
+              id="btn_browse_dest_dir"
+              value="Browse"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_start_mining"
+              value="Start Mining"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <div class="progress_bar" id="show_progress" value="0%">
+              <progress
+                style="display: none"
+                id="progress_element"
+                max="100"
+                value="80"
+              ></progress>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ######################### -->
+      <!--           Step-2          -->
+      <!-- ######################### -->
+      <div class="step_2">
+        <div class="status_container">
+          <div>Step-2</div>
+          <div class="status_div"></div>
+        </div>
+
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Data File Location at</div>
+            <div class="centre" id="data_file_location"></div>
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_anonymize"
+              value="Anonymize"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div">
+            <div class="left">Anonymization File Location at</div>
+            <div class="centre" id="ann_file_location"></div>
+          </div>
+
+          <div class="items_row_div">
+            <div class="left">Anonymization Dictionary Located at</div>
+            <div class="centre" id="ann_dict_located_at"></div>
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_get_predictions"
+              value="Get Predictions"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div"></div>
+        </div>
+      </div>
+
+      <!-- ######################### -->
+      <!--          Step - 3         -->
+      <!-- ######################### -->
+      <div class="step_3">
+        <div class="status_container">
+          <div>Step-3</div>
+          <div class="status_div"></div>
+        </div>
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Anonymization Predictions File</div>
+            <div class="centre" id="ann_predictions_file"></div>
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_de_ann"
+              value="De Anonymize"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div"></div>
+        </div>
+      </div>
+
+     <!-- ######################### -->
+      <!--          Step - 4         -->
+      <!-- ######################### -->
+      <div class="step_4">
+        <div class="status_container">
+          <div>Step-4</div>
+          <div class="status_div"></div>
+        </div>
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">De-Anonymization Predictions File</div>
+            <div class="centre" id="de_ann_pre_file"></div>
+          </div>
+          <div class="items_row_div">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_show_charts"
+              value="Show Charts"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div"></div>
+        </div>
+      </div>
+      <script src="../js/renderer_main.js"></script>
+      <!-- <input class="right" id="btn" type="button" value=" > " /> -->
+    </div>
+
+    <style>
+      :root {
+        --common_height: 35px;
+        --middle_padding: 10px;
+        --border_radius: 3px;
+        --statusbar_padding: 5px;
+        --common_space: 20px;
+        --common_space_top: 10px;
+        --button_width: 150px;
+      }
+      html,
+      body,
+      #fullheight {
+        min-height: 90% !important;
+        height: 100%;
+        align-items: center;
+        align-self: center;
+        align-content: center;
+        justify-content: center;
+      }
+
+      #container {
+        height: 90%;
+        background-color: rgb(255, 255, 255);
+        /* color: rgba(231, 71, 22, 0.856); */
+        border: 3px solid rgb(63, 44, 228);
+        display: flex;
+        border-radius: 3px;
+        flex-direction: column;
+        justify-content: space-evenly;
+        order: 4;
+        padding: 20px;
+        margin: 20px;
+        /* padding: 20px; */
+      }
+
+      .status_container {
+        height: 100%;
+        width: 50px;
+        /* background-color: rgb(39, 42, 211); */
+        justify-content: center;
+        /* display: inline-block; */
+        align-items: center;
+        margin-right: 30px;
+        align-content: center;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .status_div {
+        width: 30%;
+        /* height: fit; */
+        flex-grow: 1;
+        /* max-height: 100%; */
+        /* min-height: 50%; */
+        margin-top: 5px;
+        align-content: center;
+        padding: var(--statusbar_padding);
+        justify-content: center;
+        align-items: center;
+        align-self: center;
+        background-color: tomato;
+        border-radius: var(--border_radius);
+      }
+
+      .items_container_div {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+      }
+      .items_row_div {
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+      }
+      .step_1 {
+        height: 22%;
+        /* box-sizing: border-box; */
+        /* background-color: rgb(171, 239, 241); */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+        /* padding: 5px; */
+        /* border: 5px solid rgb(255, 255, 255); */
+      }
+
+      .step_2 {
+        height: 30%;
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+      }
+
+      .step_3 {
+        height: 20%;
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+      }
+
+      .step_4 {
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        overflow: scroll;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+      }
+
+      .left {
+        width: 30%;
+        display: inline-block;
+        /* background-color: blueviolet; */
+        box-sizing: border-box;
+        /* padding: 1%; */
+        text-align: left;
+        justify-content: left;
+        /* border-radius: var(--border_radius); */
+        /* border: 1px solid black; */
+      }
+
+      .centre {
+        width: 45%;
+        display: inline-block;
+        box-sizing: border-box;
+        height: var(--common_height);
+        /* background-color: crimson; */
+        /* flex-grow: 1; */
+        margin-left: var(--common_space);
+        margin-right: var(--common_space);
+        /* padding: 1%; */
+        text-align: center;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        border-radius: var(--border_radius);
+        border: 1px solid rgb(64, 36, 224);
+      }
+
+      .right {
+        width: var(--button_width);
+        justify-content: center;
+        background-color: darkorchid;
+        align-self: center;
+        height: var(--common_height);
+        text-align: center;
+        color: white;
+        border-radius: var(--border_radius);
+      }
+      .normal_button {
+        width: var(--button_width);
+        display: inline-block;
+        margin-left: var(--common_space);
+        justify-content: center;
+        background-color: darkorchid;
+        align-self: center;
+        height: var(--common_height);
+        text-align: center;
+        color: white;
+        border-radius: var(--border_radius);
+      }
+      .progress_bar {
+        width: 30%;
+        height: 20px;
+        display: inline-block;
+        margin-left: var(--common_space);
+        justify-content: center;
+        align-self: center;
+        text-align: center;
+        border-radius: var(--border_radius);
+      }
+    </style>
+  </body>
+</html>

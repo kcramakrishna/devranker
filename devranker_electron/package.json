@@ -1,0 +1,21 @@
+{
+  "name": "devranker_electron_chart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./js/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^11.3.0",
+    "electron-builder": "^22.9.1"
+  },
+  "dependencies": {
+    "chart.js": "^2.9.4",
+    "python-shell": "^2.0.3"
+  }
+}
