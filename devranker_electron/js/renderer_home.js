@@ -25,97 +25,8 @@ try {
     DestDirectory: "",
     email_hash_dict_file_path: "",
     anonymized_file_path: "",
-
-    // // devranker_dir
-    // set_devranker_dir(value) {
-    //   this.devranker_dir = value;
-    // },
-    get get_devranker_dir() {
-      return this.devranker_dir;
-    },
-
-
-    get get_git_directory_path() {
-      return this.gitDirectory
-    },
-
-    // repo Name
-    get get_repo_name() {
-      return path.basename(this.get_git_directory_path())
-    },
-
-
-    // '.git.csv'
-    get get_target_repo_raw_data_file_name() {
-      return this.get_repo_name() + '.git.csv'
-    },
-
-
-    // output_file_name
-    set_output_file_path(value) {
-      this.output_file_name = path.join(this.get_devranker_dir(), this.get_target_repo_raw_data_file_name())
-    },
-
-
-    //  gitDirectory
-    set set_git_directory_path(path) {
-      this.gitDirectory = path
-    },
-    get get_git_directory_path() {
-      return this.gitDirectory;
-    },
-
-
-    get get_devranker_dir() {
-      return this.devranker_dir;
-    },
-
-    get get_output_file_path() {
-      return this.output_file_name;
-    },
-
-    get get_target_repo_raw_data_file_name() {
-      return this.get_repo_name() + '.git.csv';
-    },
-
-    // DestDirectory
-    /**
-     * @param {(arg0: string[]) => void} path
-     */
-    set set_dest_directory_path(path) {
-      this.DestDirectory = path
-    },
-    get get_dest_directory_path() {
-      return this.DestDirectory
-    },
-
-
-    //  repo Name
-    get get_repo_name() {
-      return path.basename(this.get_git_directory_path())
-    },
-
-
-    //  anonymized
-    get get_anonymized_file_path() {
-      // return get_devranker_dir() + '/anonymized_' + get_target_repo_raw_data_file_name()
-      return path.join(this.get_devranker_dir(), 'anonymized_' + this.get_target_repo_raw_data_file_name())
-    },
-    //  anonymized dict
-    get get_email_hash_dict_file_path() {
-      return this.get_output_file_path() + '.email_dict.pickle'
-    },
-    // predictions dir
-    get get_predictions_directory_path() {
-      return this.get_devranker_dir()
-      //  return os.path.join(get_dest_directory_path(), 'predictions')
-    },
-    get get_anonymized_predictions_file_path() {
-      return path.join(this.get_devranker_dir(), 'scores_anonymized_elasticray.git.csv')
-    },
-    get get_dev_scores_voice_data_file_path() {
-      return path.join(this.get_devranker_dir(), 'dev_scores_voice-data-backend.git.csv')
-    }
+    predicted_file_path: "",
+    de_anonymized_file_path: "",
   };
 
 
@@ -232,7 +143,7 @@ try {
       } else {
 
         pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
-        pathInfo.output_file_name = path.join(pathInfo.devranker_dir, path.basename(pathInfo.gitDirectory) + '.git.csv')
+        pathInfo.output_file_name = path.join(pathInfo.devranker_dir, getRepoDataFileName())
 
         myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo)
 
@@ -250,7 +161,7 @@ try {
 
         progress_element.value = "0"
         // Showing Progressbar
-        progress_element.style.display = "block"
+        show_progress.style.display = "block"
 
         let pyshell = new PythonShell(pythonFileName, options);
 
@@ -259,17 +170,27 @@ try {
           let data_parsed = JSON.parse(message)
 
           try {
+           
             myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
+           
             if (data_parsed.msg == 'Done') {
+           
               alert("Mining is done and File location is " + pathInfo.output_file_name)
               // Hiding Porgressbar
-              progress_element.style.display = "none"
+              show_progress.style.display = "none"
+              progress_display.innerHTML = ""
+
               data_file_location.innerHTML = pathInfo.output_file_name
+            
             } else if (data_parsed.msg == 'Progress') {
+              
+              progress_element.max = data_parsed.tc
               progress_element.value = data_parsed.cc
+
+              progress_display.innerHTML = data_parsed.cc + " / " + data_parsed.tc
               myConsole.log(data_parsed.cc, " / ", data_parsed.tc)
             } else {
-              // alert(message)
+              alert(message)
             }
           } catch (err) {
             alert(err)
@@ -299,18 +220,27 @@ try {
       PythonShell.run(pythonFileName, options, function (err, results) {
         try {
 
-          let data_parsed = JSON.parse(results[0])
+          myConsole.log("PythonShell/anonymize/response::", results, err)
+          myConsole.log("PythonShell/anonymize/error-response::", err)
 
-          myConsole.log("Anonymize::", results)
-          if (data_parsed.status == true) {
-            alert('Anonymize is done. \n\nAnonymize File location:\n' + pathInfo.anonymized_file_path +
-              '\n\nAnonymize File Dictionary location:\n' + pathInfo.email_hash_dict_file_path)
+          if (results != null) {
 
-            ann_file_location.innerHTML = pathInfo.anonymized_file_path
-            ann_dict_located_at.innerHTML = pathInfo.email_hash_dict_file_path
+            let data = results[0]
 
+            if (data == 'Done') {
+              alert('Anonymize is done. \n\nAnonymize File location:\n' + pathInfo.anonymized_file_path +
+                '\n\nAnonymize File Dictionary location:\n' + pathInfo.email_hash_dict_file_path)
+
+              ann_file_location.innerHTML = pathInfo.anonymized_file_path
+              ann_dict_located_at.innerHTML = pathInfo.email_hash_dict_file_path
+
+            } else if (data == 'Testing') {
+              myConsole.log('Testing', results)
+            } else {
+              alert("PythonShell Anonymize Exception::\n\n" + results)
+            }
           } else {
-            alert(results[0])
+            alert("PythonShell Anonymize Error::\n\n" + err)
           }
         } catch (err) {
           alert(err)
@@ -324,23 +254,66 @@ try {
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
     try {
-      alert('Not yet ready')
+      pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, 'scores_anonymized_' + getRepoDataFileName())
+      ann_predictions_file.innerHTML = pathInfo.predicted_file_path
     } catch (err) {
       alert(err)
     }
   });
 
   // De-Anonymize
-  de_ann_pre_file.addEventListener('click', (event) => {
+  btn_de_ann.addEventListener('click', (event) => {
     try {
+      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_scores_' + getRepoDataFileName())
+      let options = {
+        mode: 'text',
+        args: ['de_anonymize',
+          pathInfo.predicted_file_path,
+          pathInfo.email_hash_dict_file_path,
+          pathInfo.de_anonymized_file_path
+        ]
+      };
 
-      let dev_predictions_file_path = path.join(pathInfo.devranker_dir, 'dev_scores_' + getRepoDataFileName())
-      let anonymized_predictions_file_path = path.join(pathInfo.devranker_dir, 'scores_anonymized' +  getRepoDataFileName)
-      alert('Not yet ready')
+      myConsole.log(TAG, 'de_anonymize::', pathInfo)
+
+      PythonShell.run(pythonFileName, options, function (error_result, results) {
+
+        try {
+
+          myConsole.log("PythonShell/de_anonymize/response::", results, error_result)
+
+          if (results != null) {
+
+            let data_parsed = JSON.parse(results[0])
+
+            myConsole.log("de_anonymize::", results)
+
+            if (data_parsed.status == true) {
+
+              alert('De Anonymizing is done and File location is', pathInfo.de_anonymized_file_path)
+
+              de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
+
+            } else {
+              alert(data_parsed.msg)
+            }
+          } else {
+            alert("Error from Python File during De-Anonymizing:\n" + error_result)
+          }
+        } catch (err) {
+          alert("Exception during De-Anonymizing:\n" + err)
+        }
+      });
     } catch (err) {
       alert(err)
     }
   });
+
+
+  btn_show_charts.addEventListener('click', (event) => {
+    remote.getCurrentWindow().loadFile('./html/graph.html')
+  })
+
 
 } catch (err) {
   myConsole("Global exception:", err)

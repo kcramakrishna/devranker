@@ -10,12 +10,12 @@ var dialog = app.dialog
 function createWindow() {
     // GUI with Html
     window = new BrowserWindow({
-        width: 1000, height: 700, webPreferences: {
+        width: 1000, height: 800, webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true
         }
     })
-    window.loadFile('./html/main.html')
+    window.loadFile('./html/home.html')
     // window.loadFile('./html/index.html')
 }
 

@@ -59,13 +59,11 @@
           </div>
           <div class="items_row_div">
             <div class="left"></div>
-            <div class="progress_bar" id="show_progress" value="0%">
+            <div class="progress_bar" id="show_progress" style="display: none; align-self: flex-start;">
               <progress
-                style="display: none"
                 id="progress_element"
-                max="100"
-                value="80"
               ></progress>
+              <div id="progress_display" style="display: inline-block; margin-left: 20px;"></div>
             </div>
           </div>
         </div>
@@ -142,7 +140,7 @@
         </div>
       </div>
 
-     <!-- ######################### -->
+      <!-- ######################### -->
       <!--          Step - 4         -->
       <!-- ######################### -->
       <div class="step_4">
@@ -159,15 +157,20 @@
             <div class="left"></div>
             <input
               class="normal_button"
+              style="display: none;"
               id="btn_show_charts"
               value="Show Charts"
               type="button"
+              href="graph.html"
             />
+
+            <a class="normal_button" href="graph.html" style="text-align: center;">Show Charts</a
+            >
           </div>
           <div class="items_row_div"></div>
         </div>
       </div>
-      <script src="../js/renderer_main.js"></script>
+      <script src="../js/renderer_home.js"></script>
       <!-- <input class="right" id="btn" type="button" value=" > " /> -->
     </div>
 
@@ -361,8 +364,11 @@
         justify-content: center;
         background-color: darkorchid;
         align-self: center;
+        align-items: center;
+        align-content: center;
         height: var(--common_height);
         text-align: center;
+        text-align-last: center;
         color: white;
         border-radius: var(--border_radius);
       }
@@ -371,9 +377,6 @@
         height: 20px;
         display: inline-block;
         margin-left: var(--common_space);
-        justify-content: center;
-        align-self: center;
-        text-align: center;
         border-radius: var(--border_radius);
       }
     </style>

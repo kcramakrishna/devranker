@@ -6,6 +6,7 @@ try {
   var nodeConsole = require('console');
   const { type } = require('os');
   var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+  let pythonFileName = './py/devranker_functions.py'
 
 
   // Initializing Selector(Dropdown) related variables
@@ -38,10 +39,10 @@ try {
 
     let options = {
       mode: 'text',
-      args: []
+      args: ['get_csv_data']
     };
 
-    PythonShell.run('./py/read_csv.py', options, function (err, results) {
+    PythonShell.run(pythonFileName, options, function (err, results) {
       if (err) throw err;
       // results is an array consisting of messages collected during execution
       // res = JSON.stringify(results[0])
@@ -163,7 +164,7 @@ try {
 
 
   // On Clicking '>' button
-  btn.addEventListener('click', () => {
+  btn_load.addEventListener('click', () => {
 
     try {
 
@@ -232,6 +233,17 @@ try {
     // Now loading Graph as Dataset prepared till now
     loadGraph()
   });
+
+
+  btn_back.addEventListener('click', () => {
+       // const { remote } = require('electron')
+    // remote.getCurrentWindow().back()
+
+    // window.history.back();
+    history.go(-1);
+
+  })
+
 
   getDataFromPython()
 
