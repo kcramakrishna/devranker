@@ -5,6 +5,7 @@ try {
   // Logs from Node.js(console.log wont work in renderer.js as this is not associated with main process, but from Html Script Tag)  
   var nodeConsole = require('console');
   const { type } = require('os');
+  const { ipcRenderer } = require('electron')
   var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
   let pythonFileName = './py/devranker_functions.py'
 
@@ -33,13 +34,13 @@ try {
   input_to_month_and_year.defaultValue = date_today.getFullYear() + "-" + date_today.getMonth() + 1;
 
   // By using 'PythonShell'(which is using IPC), communicating with Python file i.e, 'graph.py'
-  function getDataFromPython() {
+  function getDataFromPython(dev_predictions_file_path) {
 
     var { PythonShell } = require('python-shell');
 
     let options = {
       mode: 'text',
-      args: ['get_csv_data']
+      args: ['get_csv_data', dev_predictions_file_path]
     };
 
     PythonShell.run(pythonFileName, options, function (err, results) {
@@ -236,7 +237,7 @@ try {
 
 
   btn_back.addEventListener('click', () => {
-       // const { remote } = require('electron')
+    // const { remote } = require('electron')
     // remote.getCurrentWindow().back()
 
     // window.history.back();
@@ -245,8 +246,16 @@ try {
   })
 
 
-  getDataFromPython()
+  let pathInfo = ipcRenderer.sendSync('synchronous-getPathInfo', 'get pathInfo')
 
+  myConsole.log('renderer_graph.js::synchronous-getPathInfo::', pathInfo)
+
+  if (pathInfo != undefined) {
+    getDataFromPython(pathInfo.de_anonymized_file_path)
+  } else {
+    alert('Unable to fetch De-Anonymized file path')
+  }
+  
 } catch (err) {
   alert(err)
 }

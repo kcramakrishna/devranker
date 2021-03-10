@@ -2,19 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Devranker - Electron with Chart.js</title>
-
-    <!-- <select name="emails" id="select_emails" multiple="multiple">
-      <option value="All" selected="selected">All Authors </option>
-    </select>
-    <select name="languages" id="select_languages">
-      <option value="" selected="selected">Select Language</option>
-    </select> -->
-    <!-- <input type="month" id="input_from_month_and_year" name="from_month" value="">
-    <input type="month" id="input_to_month_and_year" name="to_month" value="">
-
-    <input id="btn" type="button" value=" > " ></input> -->
-    <!-- <style></style> -->
+    <title>Devranker - Electron GUI</title>
   </head>
   <body>
     <div id="container">
@@ -23,10 +11,9 @@
       <!-- ######################### -->
       <div class="step_1">
         <div class="status_container">
-          <div>Step-1</div>
+          <div class="step_font">Step-1</div>
           <div class="status_div"></div>
         </div>
-
         <div class="items_container_div">
           <div class="items_row_div">
             <div class="left">Select the Location of Cloned Repo</div>
@@ -38,7 +25,7 @@
               type="button"
             />
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left">Select Destination Directory</div>
             <div class="centre" id="dest_dir"></div>
             <input
@@ -48,7 +35,7 @@
               type="button"
             />
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
               class="normal_button"
@@ -57,13 +44,18 @@
               type="button"
             />
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
-            <div class="progress_bar" id="show_progress" style="display: none; align-self: flex-start;">
-              <progress
-                id="progress_element"
-              ></progress>
-              <div id="progress_display" style="display: inline-block; margin-left: 20px;"></div>
+            <div
+              class="progress_bar"
+              id="show_progress"
+              style="display: none; align-self: flex-start"
+            >
+              <progress id="progress_element"></progress>
+              <div
+                id="progress_display"
+                style="display: inline-block; margin-left: 20px"
+              ></div>
             </div>
           </div>
         </div>
@@ -74,7 +66,7 @@
       <!-- ######################### -->
       <div class="step_2">
         <div class="status_container">
-          <div>Step-2</div>
+          <div class="step_font">Step-2</div>
           <div class="status_div"></div>
         </div>
 
@@ -83,7 +75,7 @@
             <div class="left">Data File Location at</div>
             <div class="centre" id="data_file_location"></div>
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
               class="normal_button"
@@ -92,16 +84,16 @@
               type="button"
             />
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left">Anonymization File Location at</div>
             <div class="centre" id="ann_file_location"></div>
           </div>
 
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left">Anonymization Dictionary Located at</div>
             <div class="centre" id="ann_dict_located_at"></div>
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
               class="normal_button"
@@ -110,7 +102,6 @@
               type="button"
             />
           </div>
-          <div class="items_row_div"></div>
         </div>
       </div>
 
@@ -119,7 +110,7 @@
       <!-- ######################### -->
       <div class="step_3">
         <div class="status_container">
-          <div>Step-3</div>
+          <div class="step_font">Step-3</div>
           <div class="status_div"></div>
         </div>
         <div class="items_container_div">
@@ -127,7 +118,7 @@
             <div class="left">Anonymization Predictions File</div>
             <div class="centre" id="ann_predictions_file"></div>
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
               class="normal_button"
@@ -136,7 +127,7 @@
               type="button"
             />
           </div>
-          <div class="items_row_div"></div>
+          <div class="items_row_div_with_top_margin"></div>
         </div>
       </div>
 
@@ -145,7 +136,7 @@
       <!-- ######################### -->
       <div class="step_4">
         <div class="status_container">
-          <div>Step-4</div>
+          <div class="step_font">Step-4</div>
           <div class="status_div"></div>
         </div>
         <div class="items_container_div">
@@ -153,21 +144,24 @@
             <div class="left">De-Anonymization Predictions File</div>
             <div class="centre" id="de_ann_pre_file"></div>
           </div>
-          <div class="items_row_div">
+          <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
               class="normal_button"
-              style="display: none;"
               id="btn_show_charts"
               value="Show Charts"
               type="button"
               href="graph.html"
             />
 
-            <a class="normal_button" href="graph.html" style="text-align: center;">Show Charts</a
+            <a
+              class="normal_button"
+              style="display: none"
+              href="graph.html"
+              style="text-align: center"
+              >Show Charts</a
             >
           </div>
-          <div class="items_row_div"></div>
         </div>
       </div>
       <script src="../js/renderer_home.js"></script>
@@ -175,6 +169,7 @@
     </div>
 
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500&display=swap");
       :root {
         --common_height: 35px;
         --middle_padding: 10px;
@@ -182,12 +177,15 @@
         --statusbar_padding: 5px;
         --common_space: 20px;
         --common_space_top: 10px;
-        --button_width: 150px;
+        --common_top_margin: 10px;
+        --button_width: 120px;
+        --common_font: "Quicksand";
+        --common_font_size: 15px;
       }
       html,
       body,
       #fullheight {
-        min-height: 90% !important;
+        /* min-height: 90% !important; */
         height: 100%;
         align-items: center;
         align-self: center;
@@ -241,20 +239,26 @@
 
       .items_container_div {
         width: 100%;
+        /* flex-grow: 1; */
         height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-around;
+        justify-content: center;
       }
       .items_row_div {
         width: 100%;
-        flex-grow: 1;
         display: flex;
         align-items: center;
       }
+      .items_row_div_with_top_margin {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-top: var(--common_space_top);
+      }
       .step_1 {
-        height: 22%;
+        height: 25%;
         /* box-sizing: border-box; */
         /* background-color: rgb(171, 239, 241); */
         /* padding: 1%; */
@@ -272,7 +276,7 @@
       }
 
       .step_2 {
-        height: 30%;
+        height: 32%;
         /* box-sizing: border-box; */
         /* padding: 1%; */
         border-radius: 5px;
@@ -319,6 +323,7 @@
 
       .left {
         width: 30%;
+        /* flex-grow: 1; */
         display: inline-block;
         /* background-color: blueviolet; */
         box-sizing: border-box;
@@ -327,24 +332,31 @@
         justify-content: left;
         /* border-radius: var(--border_radius); */
         /* border: 1px solid black; */
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
 
       .centre {
-        width: 45%;
-        display: inline-block;
-        box-sizing: border-box;
+        width: 47%;
         height: var(--common_height);
+        display: inline-block;
+        /* box-sizing: border-box; */
         /* background-color: crimson; */
         /* flex-grow: 1; */
         margin-left: var(--common_space);
         margin-right: var(--common_space);
         /* padding: 1%; */
-        text-align: center;
         align-items: center;
+        overflow: scroll;
+        word-wrap: break-word;
         text-align: center;
+        align-self: center;
+        align-content: center;
         justify-content: center;
         border-radius: var(--border_radius);
         border: 1px solid rgb(64, 36, 224);
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
 
       .right {
@@ -356,7 +368,10 @@
         text-align: center;
         color: white;
         border-radius: var(--border_radius);
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
+
       .normal_button {
         width: var(--button_width);
         display: inline-block;
@@ -371,13 +386,19 @@
         text-align-last: center;
         color: white;
         border-radius: var(--border_radius);
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
       .progress_bar {
         width: 30%;
         height: 20px;
         display: inline-block;
-        margin-left: var(--common_space);
+        /* margin-left: var(--common_space); */
         border-radius: var(--border_radius);
+      }
+      .step_font {
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
     </style>
   </body>

@@ -41,8 +41,6 @@ try {
 
 
 
-  myConsole.log(new Date().getFullYear(), new Date().getMonth())
-
 
 
 
@@ -53,21 +51,16 @@ try {
   // **************** COMMUNICATION ****************
   // ***********************************************
   // ASYNCHRONOUS - RECEIVER
-  ipcRenderer.on('asynchronous-testing-reply', (event, arg) => {
-    console.log(arg)
-    dest_dir.innerHTML = arg
+  ipcRenderer.on('asynchronous-reply-setPathInfo', (event, arg) => {
+    console.log('renderer_home.js::anynchronous-reply-pathInfo::', arg)
   })
 
-  // SYNCHRONOUS - SENDER & RECEIVER(Immediate callback)
-  // synchronous_callback = ipcRenderer.sendSync('synchronous-testing', 'sync ping')
-  // dest_dir.innerHTML = synchronous_callback
 
+  // ***********************************************
+  // **************** CLICK EVENTS  ****************
+  // ***********************************************
 
-  // ASYNCHRONOUS - SENDER
-  // ipcRenderer.send('asynchronous-testing', 'Select Folder')
-
-
-  // OnClick: Clone Repository
+  // Clone Repository
   btn_browse_cln_repo.addEventListener('click', async (event) => {
 
     try {
@@ -170,25 +163,26 @@ try {
           let data_parsed = JSON.parse(message)
 
           try {
-           
+
             myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
-           
+
             if (data_parsed.msg == 'Done') {
-           
-              alert("Mining is done and File location is " + pathInfo.output_file_name)
+
+              alert("Mining is done and File location is \n\n" + pathInfo.output_file_name)
               // Hiding Porgressbar
               show_progress.style.display = "none"
               progress_display.innerHTML = ""
 
               data_file_location.innerHTML = pathInfo.output_file_name
-            
+
             } else if (data_parsed.msg == 'Progress') {
-              
+
               progress_element.max = data_parsed.tc
               progress_element.value = data_parsed.cc
 
               progress_display.innerHTML = data_parsed.cc + " / " + data_parsed.tc
               myConsole.log(data_parsed.cc, " / ", data_parsed.tc)
+
             } else {
               alert(message)
             }
@@ -212,7 +206,7 @@ try {
       pathInfo.email_hash_dict_file_path = pathInfo.output_file_name + '.email_dict.pickle'
       let options = {
         mode: 'text',
-        args: ['anonymize', pathInfo.output_file_name, pathInfo.anonymized_file_path, pathInfo.email_hash_dict_file_path]
+        args: ['anonymize', pathInfo.output_file_name, pathInfo.email_hash_dict_file_path, pathInfo.anonymized_file_path]
       };
 
       myConsole.log(TAG, 'btn_anonymize::', pathInfo)
@@ -280,28 +274,31 @@ try {
 
         try {
 
-          myConsole.log("PythonShell/de_anonymize/response::", results, error_result)
+          myConsole.log("PythonShell/de_anonymize::", 'results::', results, 'error response::', error_result)
 
           if (results != null) {
 
-            let data_parsed = JSON.parse(results[0])
+            let data = results[0]
 
             myConsole.log("de_anonymize::", results)
 
-            if (data_parsed.status == true) {
+            if (data == 'Done') {
 
-              alert('De Anonymizing is done and File location is', pathInfo.de_anonymized_file_path)
+              alert('De Anonymizing is done and File location is \n\n' + pathInfo.de_anonymized_file_path)
 
               de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
 
-            } else {
-              alert(data_parsed.msg)
+              // ASYNCHRONOUS - SENDER
+              ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
+
+            } else if (data == 'exc') {
+              alert(results[1])
             }
           } else {
-            alert("Error from Python File during De-Anonymizing:\n" + error_result)
+            alert(error_result)
           }
         } catch (err) {
-          alert("Exception during De-Anonymizing:\n" + err)
+          alert(err)
         }
       });
     } catch (err) {
@@ -309,7 +306,7 @@ try {
     }
   });
 
-
+  // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
     remote.getCurrentWindow().loadFile('./html/graph.html')
   })

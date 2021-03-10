@@ -2,25 +2,30 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Devranker - Electron with Chart.js</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-    <button id="btn_back" class="btn"><i class="fa fa-chevron-left"></i></button>
-
-    <select name="emails" id="select_emails" multiple="multiple">
-      <option value="All" selected="selected">All Authors </option>
+    <title style="font-family: Quicksand;">Devranker - Electron GUI</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <button id="btn_back" class="btn" style="display: none">
+      <i class="fa fa-chevron-left"></i>
+    </button>
+    <select name="emails" style="font-family: Quicksand;" id="select_emails" multiple="multiple">
+      <option value="All" style="font-family: Quicksand;" selected="selected">All Authors</option>
     </select>
-    <select name="languages" id="select_languages">
-      <option value="" selected="selected">Select Language</option>
+    <select name="languages" style="font-family: Quicksand;" id="select_languages">
+      <option value="" style="font-family: Quicksand;" selected="selected">Select Language</option>
     </select>
-    <input type="month" id="input_from_month_and_year" name="from_month" value="">
-    <input type="month" id="input_to_month_and_year" name="to_month" value="">
+    <input
+      type="month"
+      class="common_font"
+      id="input_from_month_and_year"
+      name="from_month"
+      value=""
+    />
+    <input type="month" class="common_font" id="input_to_month_and_year" name="to_month" value="" />
 
-    <button id="btn_load" class="btn">Load</button>
-
-    <style>
-
-    </style>
+    <button id="btn_load" class="common_font">Load</button>
   </head>
   <body>
     <div>
@@ -29,5 +34,24 @@
       <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
       <script src="../js/renderer_graph.js"></script>
     </div>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500&display=swap");
+      :root {
+        --common_height: 35px;
+        --middle_padding: 10px;
+        --border_radius: 3px;
+        --statusbar_padding: 5px;
+        --common_space: 20px;
+        --common_space_top: 10px;
+        --common_top_margin: 10px;
+        --button_width: 120px;
+        --common_font: "Quicksand";
+        --common_font_size: 15px;
+      }
+      .common_font {
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+      }
+    </style>
   </body>
 </html>
