@@ -15,7 +15,9 @@
     "electron-builder": "^22.9.1"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "chart.js": "^2.9.4",
+    "form-data": "^4.0.0",
     "python-shell": "^2.0.3"
   }
 }

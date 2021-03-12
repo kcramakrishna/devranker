@@ -251,7 +251,7 @@ try {
   myConsole.log('renderer_graph.js::synchronous-getPathInfo::', pathInfo)
 
   if (pathInfo != undefined) {
-    getDataFromPython(pathInfo.de_anonymized_file_path)
+    getDataFromPython(pathInfo.graph_file_path)
   } else {
     alert('Unable to fetch De-Anonymized file path')
   }

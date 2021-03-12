@@ -5,19 +5,23 @@ try {
   var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
   const { ipcRenderer } = require('electron')
   const { remote } = require('electron')
+  // To handle Files 
   const fs = require('fs');
 
-  var TAG = 'renderer_main.js::'
+  // REST API Upload
+  var TAG = '\n(renderer_main.js::)\n'
+  let URL = 'http://localhost:5000/predict'
   let pythonFileName = './py/devranker_functions.py'
   // to replace os.path.join in python
   var path = require('path');
 
-
+  // To make API Calls, Especially to Upload Anonymized file
+  const axios = require('axios');
 
   let pyshell = new PythonShell(pythonFileName);
 
 
-  // Variables for python paths
+  // Required file paths
   let pathInfo = {
     devranker_dir: "",
     output_file_name: "",
@@ -29,21 +33,9 @@ try {
     de_anonymized_file_path: "",
   };
 
-
-
   function getRepoDataFileName() {
     return path.basename(pathInfo.gitDirectory) + '.git.csv'
   }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -56,10 +48,43 @@ try {
   })
 
 
+  async function apicall_getPredictionsFile() {
+
+    const fs = require('fs');
+    const got = require('got')
+
+    const FormData = require('form-data');
+    var formData = new FormData();
+    formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
+
+    try {
+      const res = await got.post(URL, {
+        body: formData,
+        headers: {
+          ...formData.getHeaders() // sets the boundary and Content-Type header
+        }
+      }).on('uploadProgress', progress => {
+        // myConsole.log('Process::', Math.round(progress.percent * 100))
+      });
+
+      if (res.statusCode === 200) {
+        myConsole.log('res.statusCode === 200::', res)
+        // pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, 'scores_anonymized_' + getRepoDataFileName())
+        pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, res.body)
+        ann_predictions_file.innerHTML = pathInfo.predicted_file_path
+        alert('Predictions is Done. File Location is \n\n' + pathInfo.predicted_file_path)
+
+      } else {
+        myConsole.log('exc::', res, '\n\n\n\n\n', res.text)
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   // ***********************************************
   // **************** CLICK EVENTS  ****************
   // ***********************************************
-
   // Clone Repository
   btn_browse_cln_repo.addEventListener('click', async (event) => {
 
@@ -101,13 +126,8 @@ try {
     }
   });
 
-
-
-
-
   // Browse Destination Directory
   btn_browse_dest_dir.addEventListener('click', async (event) => {
-
     try {
       const pathArray = await remote.dialog.showOpenDialog({ properties: ['openDirectory'] })
 
@@ -120,7 +140,6 @@ try {
       alert(err)
     }
   });
-
 
   // Start Mining
   btn_start_mining.addEventListener('click', async () => {
@@ -248,8 +267,7 @@ try {
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
     try {
-      pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, 'scores_anonymized_' + getRepoDataFileName())
-      ann_predictions_file.innerHTML = pathInfo.predicted_file_path
+      apicall_getPredictionsFile()
     } catch (err) {
       alert(err)
     }
@@ -285,6 +303,7 @@ try {
             if (data == 'Done') {
 
               alert('De Anonymizing is done and File location is \n\n' + pathInfo.de_anonymized_file_path)
+              pathInfo.graph_file_path = pathInfo.de_anonymized_file_path
 
               de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
 
@@ -306,13 +325,31 @@ try {
     }
   });
 
+  // Change Graph File Location
+  btn_graph_path.addEventListener('click', async (event) => {
+    try {
+      const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+
+      let pathSel = pathArray.filePaths
+
+      de_ann_pre_file.innerHTML = pathSel
+      pathInfo.graph_file_path = pathSel.toString()
+      // ASYNCHRONOUS - SENDER
+      ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
+
+      myConsole.log(TAG, 'btn_browse_dest_dir/pathInfo:', pathInfo)
+    } catch (err) {
+      alert(err)
+    }
+  });
+
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
-    remote.getCurrentWindow().loadFile('./html/graph.html')
-  })
-
+    show_charts_href.click()
+    // remote.getCurrentWindow().loadFile('./html/graph.html')
+  });
 
 } catch (err) {
-  myConsole("Global exception:", err)
   alert(err)
+  myConsole("Global exception:", err)
 }
