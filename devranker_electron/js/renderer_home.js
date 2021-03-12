@@ -56,30 +56,38 @@ try {
     const FormData = require('form-data');
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
-
+    // TODO: Ravi - Replace this code to get file name also from Response
+    let filePath = path.join(pathInfo.devranker_dir, 'cpu_scores_anonymized_' + getRepoDataFileName())
     try {
-      const res = await got.post(URL, {
+      const res = await got.stream(URL, {
+        method: 'POST',
         body: formData,
         headers: {
           ...formData.getHeaders() // sets the boundary and Content-Type header
         }
-      }).on('uploadProgress', progress => {
-        // myConsole.log('Process::', Math.round(progress.percent * 100))
-      });
+      }).pipe(fs.createWriteStream(filePath)).
+        on("finish", () => {
 
-      if (res.statusCode === 200) {
-        myConsole.log('res.statusCode === 200::', res)
-        // pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, 'scores_anonymized_' + getRepoDataFileName())
-        pathInfo.predicted_file_path = path.join(pathInfo.devranker_dir, res.body)
-        ann_predictions_file.innerHTML = pathInfo.predicted_file_path
-        alert('Predictions is Done. File Location is \n\n' + pathInfo.predicted_file_path)
+          pathInfo.predicted_file_path = filePath
+          ann_predictions_file.innerHTML = pathInfo.predicted_file_path
 
-      } else {
-        myConsole.log('exc::', res, '\n\n\n\n\n', res.text)
-      }
+          alert('Predictions File Generated Successfully.\n\nFile Location is:\n' + filePath)
+          myConsole.log(`File downloaded to ${filePath}`);
+        }).
+        on("error", (error) => {
+          alert('Predictions Failed, Please try again later.\n\n' + error.message)
+          myConsole.error(`Could not write file to system: ${error}`);
+        })
+
     } catch (e) {
       console.log(e);
     }
+  }
+
+  // ASYNCHRONOUS - SENDER
+  function storePathInfoInMainJs() {
+    ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
+    myConsole.log(TAG, 'btn_browse_dest_dir/pathInfo:', pathInfo)
   }
 
   // ***********************************************
@@ -275,6 +283,7 @@ try {
 
   // De-Anonymize
   btn_de_ann.addEventListener('click', (event) => {
+
     try {
       pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_scores_' + getRepoDataFileName())
       let options = {
@@ -302,14 +311,11 @@ try {
 
             if (data == 'Done') {
 
-              alert('De Anonymizing is done and File location is \n\n' + pathInfo.de_anonymized_file_path)
-              pathInfo.graph_file_path = pathInfo.de_anonymized_file_path
+              alert('De Anonymizing is done. \n\nFile location is:\n' + pathInfo.de_anonymized_file_path)
 
               de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
 
-              // ASYNCHRONOUS - SENDER
-              ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
-
+              storePathInfoInMainJs()
             } else if (data == 'exc') {
               alert(results[1])
             }
@@ -325,28 +331,70 @@ try {
     }
   });
 
-  // Change Graph File Location
-  btn_graph_path.addEventListener('click', async (event) => {
+
+  // Data File Location at
+  btn_dfla.addEventListener('click', async (event) => {
     try {
       const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
-
       let pathSel = pathArray.filePaths
-
-      de_ann_pre_file.innerHTML = pathSel
-      pathInfo.graph_file_path = pathSel.toString()
-      // ASYNCHRONOUS - SENDER
-      ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
-
-      myConsole.log(TAG, 'btn_browse_dest_dir/pathInfo:', pathInfo)
+      data_file_location.innerHTML = pathSel
+      pathInfo.output_file_name = pathSel.toString()
+    } catch (err) {
+      alert(err)
+    }
+  });
+  // Anonymization File Location at
+  btn_afla.addEventListener('click', async (event) => {
+    try {
+      const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+      let pathSel = pathArray.filePaths
+      ann_file_location.innerHTML = pathSel
+      pathInfo.anonymized_file_path = pathSel.toString()
+    } catch (err) {
+      alert(err)
+    }
+  });
+  // Anonymization Dictionary Located at
+  btn_adla.addEventListener('click', async (event) => {
+    try {
+      const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+      let pathSel = pathArray.filePaths
+      ann_dict_located_at.innerHTML = pathSel
+      pathInfo.email_hash_dict_file_path = pathSel.toString()
+    } catch (err) {
+      alert(err)
+    }
+  });
+  // Anonymization Predictions File
+  btn_apf.addEventListener('click', async (event) => {
+    try {
+      const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+      let pathSel = pathArray.filePaths
+      ann_predictions_file.innerHTML = pathSel
+      pathInfo.predicted_file_path = pathSel.toString()
     } catch (err) {
       alert(err)
     }
   });
 
+  // Change Graph File Location
+  btn_graph_path.addEventListener('click', async (event) => {
+    try {
+      const pathArray = await remote.dialog.showOpenDialog({ properties: ['openFile'] })
+      let pathSel = pathArray.filePaths
+      de_ann_pre_file.innerHTML = pathSel
+      pathInfo.de_anonymized_file_path = pathSel.toString()
+      storePathInfoInMainJs()
+    } catch (err) {
+      alert(err)
+    }
+  });
+
+
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
-    show_charts_href.click()
-    // remote.getCurrentWindow().loadFile('./html/graph.html')
+    // show_charts_href.click()
+    remote.getCurrentWindow().loadFile('./html/graph.html')
   });
 
 } catch (err) {

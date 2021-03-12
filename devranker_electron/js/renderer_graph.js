@@ -237,25 +237,23 @@ try {
 
 
   btn_back.addEventListener('click', () => {
-    // const { remote } = require('electron')
+    const { remote } = require('electron')
     // remote.getCurrentWindow().back()
-
     // window.history.back();
-    history.go(-1);
-
+    remote.getCurrentWindow().loadFile('./html/home.html')
+    // history.go(-1)
   })
 
 
   let pathInfo = ipcRenderer.sendSync('synchronous-getPathInfo', 'get pathInfo')
 
-  myConsole.log('renderer_graph.js::synchronous-getPathInfo::', pathInfo)
+  myConsole.log('\n\nrenderer_graph.js::synchronous-getPathInfo::', pathInfo)
 
   if (pathInfo != undefined) {
-    getDataFromPython(pathInfo.graph_file_path)
+    getDataFromPython(pathInfo.de_anonymized_file_path)
   } else {
     alert('Unable to fetch De-Anonymized file path')
   }
-  
 } catch (err) {
   alert(err)
 }
