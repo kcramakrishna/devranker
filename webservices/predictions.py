@@ -4,6 +4,7 @@ import io
 import csv
 import os
 import glob
+from flask.wrappers import Response
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 from datetime import datetime
@@ -221,9 +222,22 @@ def predict():
     # https://www.w3schools.com/python/ref_requests_response.asp
     # https://www.fullstackpython.com/flask-helpers-make-response-examples.html
     # We need to send filename along with the file contents. We need to figure out how.
-    response = make_response(predictions_file)
-    response.headers["Content-Disposition"] = "attachment"
-    return response
+    # response = make_response(predictions_file)
+    # response.headers["Content-Disposition"] = "attachment"
+    # return response
+   
+    # TODO: KC - It was added by Ravi. Need Code Review?
+    try:
+        # Reading File Data
+        with open(os.path.join(os.getcwd(), predictions_file), 'rb') as f:
+             data = f.readlines()
+    except Exception as e:
+        os.abort(400, e)
+
+    return Response(data, headers={
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename=%s;' % predictions_file
+    })
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
