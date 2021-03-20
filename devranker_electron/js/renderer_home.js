@@ -63,7 +63,7 @@ try {
         method: 'POST',
         body: formData,
         headers: {
-          ...formData.getHeaders() // sets the boundary and Content-Type header
+          ...formData.getHeaders()
         }
       }).pipe(fs.createWriteStream(filePath)).
         on("finish", () => {

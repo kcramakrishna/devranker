@@ -221,9 +221,11 @@ def get_csv_data(dev_predictions_file_path):
         dicttables[extE] = {}
         for extd in dates:
             dicttables[extE][extd] = 0
+    # fixed issue while reading modscore, so kept int() to convert into int before serializing into Json
+    # Ref: https://www.javaprogramto.com/2019/11/python-typeerror-integer-json-not-serializable.html            
     for j in range(csv_data.shape[0]):
         dicttables[csv_data['Email'][j]][csv_data['committed_date']
-                                         [j]] += csv_data['mod_score'][j]
+                                         [j]] += int(csv_data['mod_score'][j])  
     print(json.dumps(dicttables))
 
 

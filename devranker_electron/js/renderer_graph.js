@@ -44,21 +44,26 @@ try {
     };
 
     PythonShell.run(pythonFileName, options, function (err, results) {
-      if (err) throw err;
-      // results is an array consisting of messages collected during execution
-      // res = JSON.stringify(results[0])
-      // res = JSON.parse(results[0]) 
-      let data_parsed = JSON.parse(results[0])
+      try {
+        if (err) throw err;
+        // results is an array consisting of messages collected during execution
+        // res = JSON.stringify(results[0])
+        // res = JSON.parse(results[0]) 
+        let data_parsed = JSON.parse(results[0])
 
-      list_authors = Object.keys(data_parsed)
-      list_authors_data = Object.values(data_parsed)
+        list_authors = Object.keys(data_parsed)
+        list_authors_data = Object.values(data_parsed)
 
-      // myConsole.log('\n\nparsed data ::', data_parsed["abdon.pijpelink@elastic.co"])
-      myConsole.log('\n\nparsed data ::', data_parsed)
-      myConsole.log('\n\nauthors ::', list_authors)
-      myConsole.log('\n\nlist_authors_data ::', list_authors_data)
+        // myConsole.log('\n\nparsed data ::', data_parsed["abdon.pijpelink@elastic.co"])
+        myConsole.log('\n\nparsed data ::', data_parsed)
+        myConsole.log('\n\nauthors ::', list_authors)
+        myConsole.log('\n\nlist_authors_data ::', list_authors_data)
 
-      setSelectors()
+        setSelectors()
+
+      } catch (err) {
+        alert("Exception while reading below file \n" + dev_predictions_file_path + "\n\n" + err)
+      }
     });
   }
 

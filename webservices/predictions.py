@@ -235,7 +235,7 @@ def predict():
         os.abort(400, e)
 
     return Response(data, headers={
-        'Content-Type': 'application/zip',
+        'Content-Type': 'application/csv',
         'Content-Disposition': 'attachment; filename=%s;' % predictions_file
     })
 
