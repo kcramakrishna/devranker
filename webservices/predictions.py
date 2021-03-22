@@ -111,7 +111,7 @@ def predict():
     scaler = MinMaxScaler()
     
      # Folder having the GMM pickle files
-    gmm_models_folder = '/home/kc/Projects/data_files/sav_files/gmm_sav'
+    gmm_models_folder = '/home/kc/Projects/data_files/sav_files/gmm_sav/'
 
     # Get the file names of saved GMM models. Get the file_ext from the file names
     a = glob.glob(gmm_models_folder + '*cpu*.sav')
@@ -119,7 +119,7 @@ def predict():
     file_ext_models = [x.split('_')[0] for x in gmm_model_files]
 
     # Folder having xgboost models
-    xgboost_models_folder = '/home/kc/Projects/data_files/sav_files/xgboost_sav'
+    xgboost_models_folder = '/home/kc/Projects/data_files/sav_files/xgboost_sav/'
 
     # Apparently it is a bad idea to append to DataFrames.
     # https://stackoverflow.com/questions/13784192/creating-an-empty-pandas-dataframe-then-filling-it
