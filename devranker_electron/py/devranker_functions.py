@@ -25,7 +25,8 @@ def process_commit(commit, doc_list, completed_commits):
         # https://www.geeksforgeeks.org/how-to-get-file-extension-in-python/
         # 'pathlib.Path' gives extension 'None' for all '.' files i.e. .bashrc etc.
         #     it also gives an exception in some cases. We need to handle that too.
-        file_ext = pathlib.Path(mod.filename).suffix or 'NoExt'
+        file_ext_suffix = pathlib.Path(mod.filename).suffix or '.NoExt'
+        file_ext = file_ext_suffix.split('.')[1]
 
         mod_data = {'hash': commit.hash, 'Author': commit.author.name, 'Email': commit.author.email,
                     'message': commit.msg, 'authored_date': commit.author_date,
