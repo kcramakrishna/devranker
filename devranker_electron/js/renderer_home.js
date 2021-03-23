@@ -34,10 +34,14 @@ try {
   };
 
   function getRepoDataFileName() {
-    return path.basename(pathInfo.gitDirectory) + '.git.csv'
+    // This is the case when Directly trying to do Anonymizing by uploading Mined file Directly through Browse option
+    // Already Forcing for destination folder, So to get Repo name depening on Uploaded mined file checking this condition
+    if (pathInfo.gitDirectory == '' && pathInfo.output_file_name != '') {
+      return path.basename(pathInfo.output_file_name)
+    } else {
+      return path.basename(pathInfo.gitDirectory) + '.git.csv'
+    }
   }
-
-
 
   // ***********************************************
   // **************** COMMUNICATION ****************
@@ -57,7 +61,7 @@ try {
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
     // TODO: Ravi - Replace this code to get file name also from Response
-    let filePath = path.join(pathInfo.devranker_dir, 'cpu_scores_anonymized_' + getRepoDataFileName())
+    let filePath = path.join(pathInfo.DestDirectory, 'cpu_scores_anonymized_' + getRepoDataFileName())
     try {
       const res = await got.stream(URL, {
         method: 'POST',
@@ -226,11 +230,13 @@ try {
 
   // Anonymize
   btn_anonymize.addEventListener('click', (event) => {
-
     try {
-
-      pathInfo.anonymized_file_path = path.join(pathInfo.devranker_dir, 'anonymized_' + getRepoDataFileName()) // path.basename(pathInfo.gitDirectory) + '.git.csv'
-      pathInfo.email_hash_dict_file_path = pathInfo.output_file_name + '.email_dict.pickle'
+      if (pathInfo.DestDirectory == '') {
+        alert('Please Choose Destination Directory')
+        return
+      }
+      pathInfo.anonymized_file_path = path.join(pathInfo.DestDirectory, 'anonymized_' + getRepoDataFileName()) // path.basename(pathInfo.gitDirectory) + '.git.csv'
+      pathInfo.email_hash_dict_file_path = path.join(pathInfo.DestDirectory, getRepoDataFileName() + '.email_dict.pickle')
       let options = {
         mode: 'text',
         args: ['anonymize', pathInfo.output_file_name, pathInfo.email_hash_dict_file_path, pathInfo.anonymized_file_path]
@@ -275,6 +281,15 @@ try {
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
     try {
+
+      if (pathInfo.DestDirectory == '') {
+        alert('Please Choose Destination Directory')
+        return
+      } else if (pathInfo.anonymized_file_path == '') {
+        alert('Anonymized file Not Available to do Predictions')
+        return
+      }
+
       apicall_getPredictionsFile()
     } catch (err) {
       alert(err)
@@ -285,7 +300,19 @@ try {
   btn_de_ann.addEventListener('click', (event) => {
 
     try {
-      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_scores_' + getRepoDataFileName())
+
+      if (pathInfo.DestDirectory == '') {
+        alert('Please Choose Destination Directory')
+        return
+      } else if (pathInfo.predicted_file_path == '') {
+        alert('Predictions File not available for De-Anonymize')
+        return
+      } else if (pathInfo.email_hash_dict_file_path == '') {
+        alert('Email-Pickle File not available for De-Anonymize')
+        return
+      }
+
+      pathInfo.de_anonymized_file_path = path.join(pathInfo.DestDirectory, 'dev_scores_' + getRepoDataFileName())
       let options = {
         mode: 'text',
         args: ['de_anonymize',
@@ -393,6 +420,11 @@ try {
 
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
+
+    if (pathInfo.de_anonymized_file_path == '') {
+      alert('Please Choose De-Anonymized File to see Charts')
+      return
+    }
     // show_charts_href.click()
     remote.getCurrentWindow().loadFile('./html/graph.html')
   });

@@ -19,12 +19,14 @@ try {
   // Initializing Graph related variables
   let list_x_axis_months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   let list_graph_dataset = []
+  let list_sum_of_mods = []
 
 
 
 
   // Instances for widgets
-  var ctx_for_chart = document.getElementById("chart_area");
+  var ctx_for_linechart = document.getElementById("chart_line_area");
+  var ctx_for_piechart = document.getElementById("chart_pie_area");
 
 
   // Setting default Year & Month to From & To Date pickers
@@ -67,41 +69,114 @@ try {
     });
   }
 
-  // To Load Graph with 'Chart.js'
-  function loadGraph() {
-    var myChart = new Chart(ctx_for_chart, {
-      type: "line",
-      data: {
-        labels: list_x_axis_months,
-        datasets: list_graph_dataset,
-      },
-      options: {
-        scales: {
-          xAxes: [{
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Month'
-            }
-          }],
-          yAxes: [{
-            display: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Mod Score'
-            },
-            ticks: {
-              beginAtZero: true,
-            },
-          }]
+  // Loading Line Graph with 'Chart.js'
+  function loadLineGraph() {
+    try {
+      ctx_for_piechart.style.display = "none"
+      ctx_for_linechart.style.display = 'block'
+
+      new Chart(chart_line_area, {
+        type: "line",
+        data: {
+          labels: list_x_axis_months,
+          datasets: list_graph_dataset,
         },
-        elements: {
-          point: {
-            pointStyle: 'rectRot'
+        options: {
+          scales: {
+            xAxes: [{
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: 'Month'
+              }
+            }],
+            yAxes: [{
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: 'Mod Score'
+              },
+              ticks: {
+                beginAtZero: true,
+              },
+            }]
+          },
+          elements: {
+            point: {
+              pointStyle: 'rectRot'
+            }
           }
+        },
+      });
+
+    } catch (err) {
+      alert(err)
+    }
+  }
+
+  // Loading Pie Chart Graph
+  function loadPieGraph() {
+
+
+    myConsole.log('\n\nLoading pie Chart::\n')
+
+    try {
+
+      let list_mods_sum = []
+
+      // Preparing Mods Total for Authors
+      for (x in list_graph_dataset) {
+
+        myConsole.log('\n\n\n\nAuthor:, ', list_authors[x], "::\n", list_graph_dataset[x])
+        myConsole.log('ModScores:', "::\n", list_graph_dataset[x].data)
+
+        let temp = 0
+
+        for (y in list_graph_dataset[x].data) {
+          temp = temp + parseInt(list_graph_dataset[x].data[y])
         }
-      },
-    });
+
+        list_mods_sum.push("" + temp)
+
+        temp = 0
+
+        myConsole.log('Mods Total for Author, ', list_authors[x], " is::", temp) // , "\n\nPieChartList is::", list_mods_sum)
+      }
+
+      // Preparing Background colors for each Mod Total of Author
+      list_bg_colors = []
+      for (x in list_authors) {
+        var rgbVals = randomRGB();
+        let bg_color = "rgb(" + rgbVals[0] + ", " + rgbVals[1] + ", " + rgbVals[2] + ")"
+        list_bg_colors.push(bg_color)
+      }
+
+      // Managing Visibility of canvas of line & pie charts
+      myConsole.log('\n\n\n Pie Chart Data after Added Mod Scores for idividual Authores is::', list_mods_sum)
+      ctx_for_linechart.style.display = "none"
+      ctx_for_piechart.style.display = 'block'
+
+      // Preparing Config
+      var config = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: list_mods_sum,
+            backgroundColor: list_bg_colors,
+            label: 'Dataset 1'
+          }],
+          labels: list_authors
+        },
+        options: {
+          responsive: true
+        }
+      };
+
+      new Chart(chart_pie_area, config);
+
+    } catch (err) {
+      alert(err)
+    }
   }
 
   // Preparing Idividual Author's Data to add for Graph Dataset i.e, 'list_graph_dataset'
@@ -168,9 +243,7 @@ try {
     }
   }
 
-
-  // On Clicking '>' button
-  btn_load.addEventListener('click', () => {
+  function prepareGraphData(isLineGraph) {
 
     try {
 
@@ -184,7 +257,10 @@ try {
       let to_month = arr_splitted_to_date[1];
 
 
-      if (parseInt(from_year) - parseInt(to_year) == -1 && parseInt(from_month) == parseInt(to_month)) {
+      // Validating Month & Year
+      // (0 - Same Year) || (-1 - Correct Diff, From month > To Month)-> 
+      // parseInt - To convert String into Integer
+      if ((parseInt(from_year) - parseInt(to_year) == 0) || (parseInt(from_year) - parseInt(to_year) == -1 && parseInt(from_month) >= parseInt(to_month))) {
         list_graph_dataset = []
       } else {
         alert("From & To Dates Interval must be 12 months")
@@ -236,8 +312,25 @@ try {
       myConsole.log("btn_clicked::exception::", err)
       alert(err)
     }
-    // Now loading Graph as Dataset prepared till now
-    loadGraph()
+
+    myConsole.log("list_graph_dataset::", list_graph_dataset)
+
+    // Till now prepared Dataset, Loading Graph now
+    if (isLineGraph) {
+      loadLineGraph()
+    } else {
+      loadPieGraph()
+    }
+  }
+
+  // On Clicking 'Load Line Chart' button
+  btn_load_line.addEventListener('click', () => {
+    prepareGraphData(true)
+  });
+
+  // On Clicking 'Load Pie Chart' button
+  btn_load_pie.addEventListener('click', () => {
+    prepareGraphData(false)
   });
 
 
