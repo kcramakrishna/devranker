@@ -149,44 +149,11 @@ def anonymize(output_file_path, email_hash_dict_file_path, anonymized_file_path)
     reverse_email_hash_dict = {}
     for author_email in target_repo_commits['Email'].unique().tolist():
         # First hash the email
-        hashed_email = hashlib.sha256(str(author_email).encode()).hexdigest()
+        hashed_email = hash_encrypt(author_email)
         # Now add the hash and corresponding email to dictionary
         email_hash_dict[hashed_email] = author_email
         # Now populate the reverse dict
         reverse_email_hash_dict[author_email] = hashed_email
-    # Logic should be to look up the hashed email from dictionary and add it to the pandas dataframe.
-    # https://stackoverflow.com/questions/20250771/remap-values-in-pandas-column-with-a-dict
-    target_repo_commits['Email_encrypted'] = \
-        target_repo_commits['Email'].parallel_map(reverse_email_hash_dict)
-
-    # Avoiding encrypting to speed up process.
-    target_repo_commits['Author_encrypted'] = \
-        target_repo_commits['Author']
-    #     #target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['Author']), axis=1)
-
-    # # Encrypt Email - We are encrypting this above
-    # target_repo_commits['Email_encrypted'] = \
-    #     target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['Email']), axis=1)
-
-    # Avoiding encrypting to speed up process.
-    target_repo_commits['Committer_encrypted'] = \
-        target_repo_commits['Committer']
-    #     #target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['Committer']), axis=1)
-
-    # Avoiding encrypting to speed up process.
-    target_repo_commits['file_name_encrypted'] = \
-        target_repo_commits['file_name']
-    #     #target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['file_name']), axis=1)
-
-    # Avoiding encrypting to speed up process.
-    target_repo_commits['file_old_path_encrypted'] = \
-        target_repo_commits['file_old_path']
-    #     #target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['file_old_path']), axis=1)
-
-    # Avoiding encrypting to speed up process.
-    target_repo_commits['file_new_path_encrypted'] = \
-        target_repo_commits['file_new_path']
-    #     #target_repo_commits.parallel_apply(lambda x: hash_encrypt(target_repo_commits['file_new_path']), axis=1)
 
     # Pickle this dictionary and write to file for future use
     # We don't need to pickle the reverse dictionary
@@ -194,6 +161,32 @@ def anonymize(output_file_path, email_hash_dict_file_path, anonymized_file_path)
     email_hash_dict_file_handler = open(email_hash_dict_file, 'wb')
     pickle.dump(email_hash_dict, email_hash_dict_file_handler)
     email_hash_dict_file_handler.close()
+
+    # Encrypt email
+    # Logic should be to look up the hashed email from dictionary and add it to the pandas dataframe.
+    # https://stackoverflow.com/questions/20250771/remap-values-in-pandas-column-with-a-dict
+    target_repo_commits['Email_encrypted'] = \
+        target_repo_commits['Email'].parallel_map(reverse_email_hash_dict)
+
+    # We will need to create dictionary at some point if we need to display original string.
+    target_repo_commits['Author_encrypted'] = \
+        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['Author']), axis=1)
+
+    # We will need to create dictionary at some point if we need to display original string.
+    target_repo_commits['Committer_encrypted'] = \
+        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['Committer']), axis=1)
+
+    # We will need to create dictionary at some point if we need to display original string.
+    target_repo_commits['file_name_encrypted'] = \
+        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_name']), axis=1)
+
+    # We will need to create dictionary at some point if we need to display original string.
+    target_repo_commits['file_old_path_encrypted'] = \
+        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_old_path']), axis=1)
+
+    # We will need to create dictionary at some point if we need to display original string.
+    target_repo_commits['file_new_path_encrypted'] = \
+        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_new_path']), axis=1)
 
     # Drop the clear text columns
     target_repo_commits.drop(columns=['Author', 'Email', 'Committer', 'file_name', 'file_old_path', 'file_new_path'],
@@ -215,11 +208,6 @@ def de_anonymize(anonymized_predictions_file_path, email_hash_dict_file_path, de
     # Iterate through each row to put back the emails
     # https://stackoverflow.com/questions/20250771/remap-values-in-pandas-column-with-a-dict
     predictions_data['Email'] = predictions_data['Email_encrypted'].parallel_map(email_hash_dict)
-
-    # for i in range(len(predictions_data)):
-    #     hashed_email = anonymized_predictions_data.loc[i, 'Email_encrypted']
-    #     predictions_data.loc[i, 'Email'] = email_hash_dict.get(hashed_email)
-    #     print('hashed: ', hashed_email, 'email: ', predictions_data.loc[i, 'Email'])
 
     predictions_data.to_csv(dev_predictions_file_path)
     print('De-anon - Done: ', dev_predictions_file_path)
