@@ -111,7 +111,7 @@ def predict():
     scaler = MinMaxScaler()
     
      # Folder having the GMM pickle files
-    gmm_models_folder = '/home/kc/Projects/data_files/sav_files/gmm_sav'
+    gmm_models_folder = '/home/kc/Projects/data_files/sav_files/gmm_sav/'
 
     # Get the file names of saved GMM models. Get the file_ext from the file names
     a = glob.glob(gmm_models_folder + '*cpu*.sav')
@@ -119,7 +119,7 @@ def predict():
     file_ext_models = [x.split('_')[0] for x in gmm_model_files]
 
     # Folder having xgboost models
-    xgboost_models_folder = '/home/kc/Projects/data_files/sav_files/xgboost_sav'
+    xgboost_models_folder = '/home/kc/Projects/data_files/sav_files/xgboost_sav/'
 
     # Apparently it is a bad idea to append to DataFrames.
     # https://stackoverflow.com/questions/13784192/creating-an-empty-pandas-dataframe-then-filling-it
@@ -171,8 +171,7 @@ def predict():
             # Now we need to map the cluster labels to the 'sum of centroids' for that cluster
             centroid_map = {}
             for i in range(real_centroids_dataFrame.shape[0]):
-                centroid_map[real_centroids_dataFrame['original_cluster_labels'].values[i]] = \
-                    real_centroids_dataFrame['Sum_centroids'].values[i]
+                centroid_map[real_centroids_dataFrame['original_cluster_labels'].values[i]] = real_centroids_dataFrame['Sum_centroids'].values[i]
 
             # Initialise a coloumn for holding the probabilities of the prediction
             probability_for_labels = np.zeros((len(predicted_clusters), 1))
@@ -187,16 +186,13 @@ def predict():
             target_repo_data_frame_all_coloumns['probablities'] = probability_for_labels
 
             # Look up the Sum of Centroids for each cluster for each mod and add it to the row.
-            target_repo_data_frame_all_coloumns['sum_centroid'] = \
-            np.arange(0.0,target_repo_data_frame_all_coloumns.shape[0], 1.0)
+            target_repo_data_frame_all_coloumns['sum_centroid'] = np.arange(0.0,target_repo_data_frame_all_coloumns.shape[0], 1.0)
 
             for i in range(target_repo_data_frame_all_coloumns.shape[0]):
-                target_repo_data_frame_all_coloumns['sum_centroid'].values[i] = centroid_map[
-                    target_repo_data_frame_all_coloumns['predicted_cluster'].values[i]]
+                target_repo_data_frame_all_coloumns['sum_centroid'].values[i] = centroid_map[target_repo_data_frame_all_coloumns['predicted_cluster'].values[i]]
 
             # Finally calculate the score for each mod in the target repo
-            target_repo_data_frame_all_coloumns['mod_score'] = target_repo_data_frame_all_coloumns['sum_centroid'] * \
-                                                               target_repo_data_frame_all_coloumns['probablities']
+            target_repo_data_frame_all_coloumns['mod_score'] = target_repo_data_frame_all_coloumns['sum_centroid'] * target_repo_data_frame_all_coloumns['probablities']
 
             # Append this dataframe to list_of_dfs
             list_of_dfs.append(target_repo_data_frame_all_coloumns)
