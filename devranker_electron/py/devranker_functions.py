@@ -195,7 +195,9 @@ def anonymize(output_file_path, email_hash_dict_file_path, anonymized_file_path)
     # Write it out to the file. This is the file that is to be uploaded for scoring and prediction.
     target_repo_commits.to_csv(anonymized_file_path)
 
-    print("Done: ", anonymized_file_path)
+    # print("Done: ", anonymized_file_path)
+    print("Done")
+
 
 def de_anonymize(anonymized_predictions_file_path, email_hash_dict_file_path, dev_predictions_file_path):
 
@@ -210,7 +212,9 @@ def de_anonymize(anonymized_predictions_file_path, email_hash_dict_file_path, de
     predictions_data['Email'] = predictions_data['Email_encrypted'].parallel_map(email_hash_dict)
 
     predictions_data.to_csv(dev_predictions_file_path)
-    print('De-anon - Done: ', dev_predictions_file_path)
+    # print('De-anon - Done: ', dev_predictions_file_path)
+    print('Done')
+
 
 
 def update_progress_bar(completed_commits):

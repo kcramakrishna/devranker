@@ -33,15 +33,6 @@ try {
     de_anonymized_file_path: "",
   };
 
-  function getRepoDataFileName() {
-    // This is the case when Directly trying to do Anonymizing by uploading Mined file Directly through Browse option
-    // Already Forcing for destination folder, So to get Repo name depening on Uploaded mined file checking this condition
-    if (pathInfo.gitDirectory == '' && pathInfo.output_file_name != '') {
-      return path.basename(pathInfo.output_file_name)
-    } else {
-      return path.basename(pathInfo.gitDirectory) + '.git.csv'
-    }
-  }
 
   // ***********************************************
   // **************** COMMUNICATION ****************
@@ -52,7 +43,7 @@ try {
   })
 
 
-  async function apicall_getPredictionsFile() {
+  async function apicall_getPredictionsFile(file_name) {
 
     const fs = require('fs');
     const got = require('got')
@@ -61,7 +52,7 @@ try {
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
     // TODO: Ravi - Replace this code to get file name also from Response
-    let filePath = path.join(pathInfo.DestDirectory, 'cpu_scores_anonymized_' + getRepoDataFileName())
+    let filePath = path.join(pathInfo.devranker_dir, 'cpu_scores_' + file_name)
     try {
       const res = await got.stream(URL, {
         method: 'POST',
@@ -82,7 +73,6 @@ try {
           alert('Predictions Failed, Please try again later.\n\n' + error.message)
           myConsole.error(`Could not write file to system: ${error}`);
         })
-
     } catch (e) {
       console.log(e);
     }
@@ -153,29 +143,35 @@ try {
     }
   });
 
+  function initAndCreateDevRankerDirectoryIfNotExisting() {
+
+    pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
+
+    if (!fs.existsSync(pathInfo.devranker_dir)) {
+      fs.mkdirSync(pathInfo.devranker_dir);
+      alert('Created working Directory: \n\n' + pathInfo.devranker_dir)
+    }
+  }
+
   // Start Mining
   btn_start_mining.addEventListener('click', async () => {
 
     try {
-
       // myConsole.log(TAG, 'btn_start_mining/pathInfo:', pathInfo)
-
       if (pathInfo.gitDirectory == '') {
         alert('Please Select Git Directory')
       } else if (pathInfo.DestDirectory == '') {
         alert('Please Select Destination Directory')
       } else {
 
-        pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
-        pathInfo.output_file_name = path.join(pathInfo.devranker_dir, getRepoDataFileName())
+        let reponame = path.basename(pathInfo.gitDirectory) + '.git.csv'
+
+        // Checking if "DevRanker" directory available, if not available then creating it.
+        initAndCreateDevRankerDirectoryIfNotExisting()
+
+        pathInfo.output_file_name = path.join(pathInfo.devranker_dir, reponame)
 
         myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo)
-
-        // Creating 'Devranker' Directory if not exists
-        if (!fs.existsSync(pathInfo.devranker_dir)) {
-          fs.mkdirSync(pathInfo.devranker_dir);
-          alert('Created working Directory: \n' + pathInfo.devranker_dir)
-        }
 
         // Communicate with Python
         let options = {
@@ -234,9 +230,16 @@ try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
         return
+      } else if (pathInfo.output_file_name == '') {
+        alert('There is no Mined File to Anonymize')
+        return
       }
-      pathInfo.anonymized_file_path = path.join(pathInfo.DestDirectory, 'anonymized_' + getRepoDataFileName()) // path.basename(pathInfo.gitDirectory) + '.git.csv'
-      pathInfo.email_hash_dict_file_path = path.join(pathInfo.DestDirectory, getRepoDataFileName() + '.email_dict.pickle')
+
+      initAndCreateDevRankerDirectoryIfNotExisting()
+      let reponame = path.basename(pathInfo.output_file_name) // this one had .git.csv already
+
+      pathInfo.anonymized_file_path = path.join(pathInfo.devranker_dir, 'anonymized_' + reponame)
+      pathInfo.email_hash_dict_file_path = path.join(pathInfo.devranker_dir, reponame + '.email_dict.pickle')
       let options = {
         mode: 'text',
         args: ['anonymize', pathInfo.output_file_name, pathInfo.email_hash_dict_file_path, pathInfo.anonymized_file_path]
@@ -245,9 +248,9 @@ try {
       myConsole.log(TAG, 'btn_anonymize::', pathInfo)
 
       PythonShell.run(pythonFileName, options, function (err, results) {
-        try {
 
-          myConsole.log("PythonShell/anonymize/response::", results, err)
+        try {
+          myConsole.log("PythonShell/anonymize/success-response::", results)
           myConsole.log("PythonShell/anonymize/error-response::", err)
 
           if (results != null) {
@@ -261,10 +264,8 @@ try {
               ann_file_location.innerHTML = pathInfo.anonymized_file_path
               ann_dict_located_at.innerHTML = pathInfo.email_hash_dict_file_path
 
-            } else if (data == 'Testing') {
-              myConsole.log('Testing', results)
             } else {
-              alert("PythonShell Anonymize Exception::\n\n" + results)
+              alert(results)
             }
           } else {
             alert("PythonShell Anonymize Error::\n\n" + err)
@@ -280,8 +281,8 @@ try {
 
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
-    try {
 
+    try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
         return
@@ -290,7 +291,10 @@ try {
         return
       }
 
-      apicall_getPredictionsFile()
+      initAndCreateDevRankerDirectoryIfNotExisting()
+      let reponame = path.basename(pathInfo.anonymized_file_path)
+
+      apicall_getPredictionsFile(reponame)
     } catch (err) {
       alert(err)
     }
@@ -300,7 +304,6 @@ try {
   btn_de_ann.addEventListener('click', (event) => {
 
     try {
-
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
         return
@@ -312,7 +315,10 @@ try {
         return
       }
 
-      pathInfo.de_anonymized_file_path = path.join(pathInfo.DestDirectory, 'dev_scores_' + getRepoDataFileName())
+      initAndCreateDevRankerDirectoryIfNotExisting()
+      let reponame = path.basename(pathInfo.predicted_file_path)
+
+      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_' + reponame)
       let options = {
         mode: 'text',
         args: ['de_anonymize',
@@ -358,7 +364,6 @@ try {
     }
   });
 
-
   // Data File Location at
   btn_dfla.addEventListener('click', async (event) => {
     try {
@@ -370,6 +375,7 @@ try {
       alert(err)
     }
   });
+
   // Anonymization File Location at
   btn_afla.addEventListener('click', async (event) => {
     try {
