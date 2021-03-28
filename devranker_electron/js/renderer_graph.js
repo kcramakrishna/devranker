@@ -89,7 +89,6 @@ try {
   // Loading Pie Chart Graph
   function loadPieGraph() {
 
-
     myConsole.log('\n\nLoading pie Chart::\n')
 
     try {
@@ -99,13 +98,10 @@ try {
       // Preparing Mods Total for Authors
       for (x in list_graph_dataset) {
 
-        myConsole.log('\n\n\n\nAuthor:, ', list_authors[x], "::\n", list_graph_dataset[x])
-        myConsole.log('ModScores:', "::\n", list_graph_dataset[x].data)
-
         let temp = 0
 
         for (y in list_graph_dataset[x].data) {
-          temp = temp + parseInt(list_graph_dataset[x].data[y])
+          temp = temp + parseFloat(list_graph_dataset[x].data[y])
         }
 
         list_mods_sum.push("" + temp)
@@ -188,62 +184,63 @@ try {
   // Appending data to Selectors(Dropdowns). i.e, Author Email & Language
   function setSelectors() {
 
-    list_authors = Object.keys(dict_emails)
-    list_authors_data = Object.values(dict_emails)
+    try {
+      list_authors = Object.keys(dict_emails)
+      list_authors_data = Object.values(dict_emails)
 
-    myConsole.log("list_authors_data:\n", list_authors_data)
+      for (var x in list_authors) {
+        select_emails.options[select_emails.options.length] = new Option(list_authors[x], x);
+      }
 
-    for (var x in list_authors) {
-      select_emails.options[select_emails.options.length] = new Option(list_authors[x], x);
-    }
+      for (var x in list_authors_data) {
 
-    // Languages
-    // Adding Languages Data(file_ext) in 'list_languages' variable
-    for (var x in list_authors_data) {
+        let each_auth_info_obj = list_authors_data[x]
+        var array_keys_for_languages = Object.values(each_auth_info_obj)
 
-      for (var y in list_authors_data[x]) {
-        var language = list_authors_data[x][y].file_ext
-        let array_lang_splitted = language.split(",")
+        for (var y in array_keys_for_languages) {
+          // Array of Language Dict
+          var array__languages = Object.keys(array_keys_for_languages[y])
 
-        // myConsole.log("language::\n", language, "\ntype::\n", typeof (language), "\narray_lang_splitted::\n", array_lang_splitted)
-        for (var z in array_lang_splitted) {
-          // Checking if same name added already, if not then only adding it to list 'list_languages'
-          if (!list_languages.includes(array_lang_splitted[z]) && array_lang_splitted[z] != "") {
-            list_languages.push(array_lang_splitted[z])
+          for (var w in array__languages) {
+            // Checking if same name added already, if not then only adding it to list 'list_languages'
+            if (!list_languages.includes(array__languages[w]) && array__languages[w] != "") {
+              list_languages.push(array__languages[w])
+            }
           }
         }
       }
-    }
 
-    myConsole.log("list_languages:\n", list_languages)
+      myConsole.log("list_languages:\n", list_languages)
 
-
-    // Binding languages to dropdown
-    for (var x in list_languages) {
-      select_languages.options[select_languages.options.length] = new Option(list_languages[x], x);
-    }
+      // Binding languages to dropdown
+      for (var x in list_languages) {
+        select_languages.options[select_languages.options.length] = new Option(list_languages[x], x);
+      }
 
 
-    // On Author Email Selected
-    select_emails.onchange = function () {
-      list_selected_authors = [];
-      for (var option of select_emails.options) {
-        if (option.selected) {
-          list_selected_authors.push(option.value);
+      // On Author Email Selected
+      select_emails.onchange = function () {
+        list_selected_authors = [];
+        for (var option of select_emails.options) {
+          if (option.selected) {
+            list_selected_authors.push(option.value);
+          }
+        }
+        // myConsole.log('Selected Author Indexes::', list_selected_authors)
+      }
+
+      // On Language Selected
+      select_languages.onchange = function () {
+        // myConsole.log(this.value)
+        // myConsole.log('Selected Language Index::', this.value, list_languages[this.value])
+        if (this.value != undefined) {
+          str_selected_language = list_languages[this.value]
+        } else {
+          str_selected_language = ""
         }
       }
-      myConsole.log('Selected Author Indexes::', list_selected_authors)
-    }
-
-    // On Language Selected
-    select_languages.onchange = function () {
-      myConsole.log(this.value)
-      myConsole.log('Selected Language Index::', this.value, list_languages[this.value])
-      if (this.value != undefined) {
-        str_selected_language = list_languages[this.value]
-      } else {
-        str_selected_language = ""
-      }
+    } catch (err) {
+      alert(err)
     }
   }
 
@@ -279,39 +276,43 @@ try {
       // 'list_authors' & 'list_authors_data' were already initialized in 'setSelectors()' from 'dict_emails' main dictionary
       for (x in list_authors) {
 
+        // Validation - x & list_selected_authors are indexs for Authors so comparing
         if (list_selected_authors.includes(x) || list_selected_authors.includes('All')) {
 
-          // Initializing 12 months Data as 0's for all authors
+          // list_authors_data[x] is current author's data
+          // list_authors[x] - 12 months Data initially 0
           let list_mods_of_all_months = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-          // Separating Date & Modscore-file_ext from 'list_authors_data' which was separated already from main dictionary 'dict_emails'
-          let __list_cur_author_dates = Object.keys(list_authors_data[x])
-          let __list_cur_author_score_and_file_ext = Object.values(list_authors_data[x])
 
-          for (y in __list_cur_author_dates) {
+          // List of Dates
+          let __list_keys_list_authors_data = Object.keys(list_authors_data[x]) // Dates
 
-            let date = new Date(__list_cur_author_dates[y])
+          // List of Dict of Language & Modscore
+          let __list_values_list_authors_data = Object.values(list_authors_data[x]) // File ext & Modscore
+
+          for (y in __list_keys_list_authors_data) {
+
+            let date = new Date(__list_keys_list_authors_data[y])
 
             let data_month = date.getUTCMonth() + 1
             let data_year = date.getUTCFullYear()
 
             // Validating with 'From' & 'To' month-year
             if (from_year <= data_year && to_year >= data_year) {
-              // Updating mod score by adding it to current mod for that month
-              // Existing value + Current value, here -1 is for index
-              // myConsole.log('month is :', data_month, "Its mod Value is:", list_values[y], "Present Mod value of month ", list_mods_of_all_months)
 
-              // myConsole.log('\n\nChecking Language::\n-', str_selected_language, "==?", __list_cur_author_score_and_file_ext[y].file_ext,)
-              // Checking Language is selected Language or not, then only adding mod score
-              if (__list_cur_author_score_and_file_ext[y].file_ext.includes(str_selected_language)) {
-                let updated_mod_value = list_mods_of_all_months[data_month - 1] + __list_cur_author_score_and_file_ext[y].mod_score
+              // Value of date key (Dictionary)
+              let dict_of_current_date = __list_values_list_authors_data[y]
+
+              if (dict_of_current_date.hasOwnProperty(str_selected_language)) {
+
+                let updated_mod_value = list_mods_of_all_months[data_month - 1] + dict_of_current_date[str_selected_language]
+
                 // Updating existing value in list 'list_mods_of_all_months' by considering index as 'data_month'
                 list_mods_of_all_months.splice(data_month - 1, 1, updated_mod_value)
-                // myConsole.log(list_mods_of_all_months)
               }
             }
           }
-          myConsole.log("\n\nModsList of '", list_authors[x], "is :: \n", list_mods_of_all_months)
+          myConsole.log('\n\n\n ModScores for ', list_authors[x], ' is:\n', list_mods_of_all_months)
           list_graph_dataset.push(get_graph_dataset_obj(list_authors[x], list_mods_of_all_months))
         }
       }
@@ -320,7 +321,6 @@ try {
       alert(err)
     }
 
-    // myConsole.log("list_graph_dataset::", list_graph_dataset)
     // Till now prepared Dataset, Loading Graph now
     if (isLineGraph) {
       loadLineGraph()
@@ -365,41 +365,61 @@ try {
       step: function (result) {
 
         try {
-
           // myConsole.log('parsing result::\n', result);
-
-          let _date = result.data.committed_date
+          let _date = result.data.committed_date.split(" ")[0]
           let _email = result.data.Email
-          let _modscore = result.data.mod_score
+
+          let _modscore = parseFloat(result.data.mod_score)
+
           var _file_ext = result.data.file_ext
           var _language_supported = result.data.language_supported // dont forgot, its a string value
 
-          // Checking for undefineed or 'NoExt'
-          if (_file_ext == undefined || _file_ext == 'NoExt' || _language_supported == 'False') {
-            // To avoid adding 'undefined' unnecessarily while adding first time
-            _file_ext = ""
-          }
+          // Ravi: If dont want to add Authors if 'language_supported == False'
+          if (!isNaN(_modscore) && _file_ext != undefined && _file_ext != "" && _file_ext != 'NoExt' && _language_supported == 'True') {
 
-          // Sometimes getting Unwanted Spaces either at Starting or Ending. So trimming
-          _file_ext = _file_ext.trim()
+            // Ravi: Including All authors who had 'language_supported == False'
+            // if (!isNaN(_modscore) && _file_ext != undefined && _file_ext != "" && _file_ext != 'NoExt') {
 
-          // If 'Email' not yet existing, then adding it
-          if (!dict_emails.hasOwnProperty(result.data.Email)) {
-            dict_emails[_email] = { [_date]: { mod_score: _modscore, file_ext: _file_ext } }
-          } else {
-            // So Email exists already
-            let value_for_email = dict_emails[_email]
-            // Checking if current date already existing
-            // If Date not added then add now as Value
-            if (!value_for_email.hasOwnProperty(_date)) {
-              dict_emails[_email][_date] = { mod_score: _modscore, file_ext: _file_ext }
+            // EMAIL - not availabe?
+            if (!dict_emails.hasOwnProperty(result.data.Email)) {
+              // Creating Email & Date dictionaries
+              dict_emails[_email] = {}
+              dict_emails[_email][_date] = {}
+
+              // If File Extension is Empty, then leave it.
+              if (_file_ext != "") {
+                dict_emails[_email][_date][_file_ext] = _modscore
+              }
+
+              // EMAIL avaialble
             } else {
-              let value_for_date = value_for_email[_date]
-              // If Date already added, update modscore & file_ext
-              dict_emails[_email][_date].mod_score = parseInt(value_for_date.mod_score) + parseInt(_modscore)
 
-              if (dict_emails[_email][_date].file_ext != "") {
-                dict_emails[_email][_date].file_ext = value_for_date.file_ext + ',' + _file_ext
+              let value_for_email = dict_emails[_email]
+
+              // DATE - not availabe?
+              if (!value_for_email.hasOwnProperty(_date)) {
+
+                dict_emails[_email][_date] = {}
+
+                // If File Extension is not Empty, then leave it.
+                if (_file_ext != "") {
+                  dict_emails[_email][_date][_file_ext] = _modscore
+                }
+                // DATE - availabe?
+              } else {
+
+                let value_for_date = value_for_email[_date]
+
+                // If File ext not available
+                if (!value_for_date.hasOwnProperty(_file_ext)) {
+                  dict_emails[_email][_date][_file_ext] = _modscore
+                } else {
+                  let presentvalue = parseFloat(dict_emails[_email][_date][_file_ext])
+
+                  if (!isNaN(presentvalue)) {
+                    dict_emails[_email][_date][_file_ext] = _modscore + presentvalue
+                  }
+                }
               }
             }
           }
@@ -408,9 +428,9 @@ try {
         }
       },
       complete: function (results, file) {
-        id_loader.style.display = "none"
         setSelectors()
-        // myConsole.log(dict_emails)
+        id_loader.style.display = "none"
+        myConsole.log("dict_emails::", dict_emails)
       }
     });
 
