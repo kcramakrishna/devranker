@@ -155,7 +155,8 @@ try {
 
   // Start Mining
   btn_start_mining.addEventListener('click', async () => {
-
+    var step_1 = document.getElementsByClassName('step_1')[0];
+      step_1.getElementsByClassName("status_div")[0].className = "status_completed";
     try {
       // myConsole.log(TAG, 'btn_start_mining/pathInfo:', pathInfo)
       if (pathInfo.gitDirectory == '') {
@@ -281,7 +282,8 @@ try {
 
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
-
+    var step_2 = document.getElementsByClassName('step_2')[0];
+    step_2.getElementsByClassName("status_div")[0].className = "status_completed";
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -302,7 +304,8 @@ try {
 
   // De-Anonymize
   btn_de_ann.addEventListener('click', (event) => {
-
+   var step_3 = document.getElementsByClassName('step_3')[0];
+    step_3.getElementsByClassName("status_div")[0].className = "status_completed";
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -426,7 +429,8 @@ try {
 
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
-
+   var step_4 = document.getElementsByClassName('step_4')[0];
+   step_4.getElementsByClassName("status_div")[0].className = "status_completed";
     if (pathInfo.de_anonymized_file_path == '') {
       alert('Please Choose De-Anonymized File to see Charts')
       return
