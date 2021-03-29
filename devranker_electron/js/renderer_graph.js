@@ -10,16 +10,22 @@ try {
   let pythonFileName = './py/devranker_functions.py'
 
 
+  // Dictionary which is holding entire data from csv
+  var dict_emails = {}
+
   // Initializing Selector(Dropdown) related variables
   let list_authors = []
-  let list_authors_data = []
-  let list_languates = ["Java", "Python", "React"]
+  let list_languages = []
+
+  // To store selected Language name 
+  var str_selected_language = ''
+
+
   let list_selected_authors = ['All']
 
   // Initializing Graph related variables
   let list_x_axis_months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   let list_graph_dataset = []
-  let list_sum_of_mods = []
 
 
 
@@ -34,40 +40,6 @@ try {
   myConsole.log(new Date().getFullYear(), new Date().getMonth())
   input_from_month_and_year.defaultValue = date_today.getFullYear() - 1 + "-" + date_today.getUTCMonth() + 1;
   input_to_month_and_year.defaultValue = date_today.getFullYear() + "-" + date_today.getMonth() + 1;
-
-  // By using 'PythonShell'(which is using IPC), communicating with Python file i.e, 'graph.py'
-  function getDataFromPython(dev_predictions_file_path) {
-
-    var { PythonShell } = require('python-shell');
-
-    let options = {
-      mode: 'text',
-      args: ['get_csv_data', dev_predictions_file_path]
-    };
-
-    PythonShell.run(pythonFileName, options, function (err, results) {
-      try {
-        if (err) throw err;
-        // results is an array consisting of messages collected during execution
-        // res = JSON.stringify(results[0])
-        // res = JSON.parse(results[0]) 
-        let data_parsed = JSON.parse(results[0])
-
-        list_authors = Object.keys(data_parsed)
-        list_authors_data = Object.values(data_parsed)
-
-        // myConsole.log('\n\nparsed data ::', data_parsed["abdon.pijpelink@elastic.co"])
-        myConsole.log('\n\nparsed data ::', data_parsed)
-        myConsole.log('\n\nauthors ::', list_authors)
-        myConsole.log('\n\nlist_authors_data ::', list_authors_data)
-
-        setSelectors()
-
-      } catch (err) {
-        alert("Exception while reading below file \n" + dev_predictions_file_path + "\n\n" + err)
-      }
-    });
-  }
 
   // Loading Line Graph with 'Chart.js'
   function loadLineGraph() {
@@ -216,19 +188,45 @@ try {
   // Appending data to Selectors(Dropdowns). i.e, Author Email & Language
   function setSelectors() {
 
+    list_authors = Object.keys(dict_emails)
+    list_authors_data = Object.values(dict_emails)
+
+    myConsole.log("list_authors_data:\n", list_authors_data)
+
     for (var x in list_authors) {
       select_emails.options[select_emails.options.length] = new Option(list_authors[x], x);
     }
 
-    for (var x in list_languates) {
-      select_languages.options[select_languages.options.length] = new Option(list_languates[x], x);
+    // Languages
+    // Adding Languages Data(file_ext) in 'list_languages' variable
+    for (var x in list_authors_data) {
+
+      for (var y in list_authors_data[x]) {
+        var language = list_authors_data[x][y].file_ext
+        let array_lang_splitted = language.split(",")
+
+        // myConsole.log("language::\n", language, "\ntype::\n", typeof (language), "\narray_lang_splitted::\n", array_lang_splitted)
+        for (var z in array_lang_splitted) {
+          // Checking if same name added already, if not then only adding it to list 'list_languages'
+          if (!list_languages.includes(array_lang_splitted[z]) && array_lang_splitted[z] != "") {
+            list_languages.push(array_lang_splitted[z])
+          }
+        }
+      }
     }
+
+    myConsole.log("list_languages:\n", list_languages)
+
+
+    // Binding languages to dropdown
+    for (var x in list_languages) {
+      select_languages.options[select_languages.options.length] = new Option(list_languages[x], x);
+    }
+
 
     // On Author Email Selected
     select_emails.onchange = function () {
-
       list_selected_authors = [];
-
       for (var option of select_emails.options) {
         if (option.selected) {
           list_selected_authors.push(option.value);
@@ -239,14 +237,26 @@ try {
 
     // On Language Selected
     select_languages.onchange = function () {
-      myConsole.log('Selected Language Index::', this.value)
+      myConsole.log(this.value)
+      myConsole.log('Selected Language Index::', this.value, list_languages[this.value])
+      if (this.value != undefined) {
+        str_selected_language = list_languages[this.value]
+      } else {
+        str_selected_language = ""
+      }
     }
   }
 
   function prepareGraphData(isLineGraph) {
 
     try {
+      // Validating for Language
+      if (str_selected_language == "") {
+        alert('Please select Language')
+        return
+      }
 
+      // Getting Selected Month & Year values V
       let arr_splitted_from_date = (input_from_month_and_year.value).split("-")
       let arr_splitted_to_date = (input_to_month_and_year.value).split("-")
 
@@ -256,8 +266,7 @@ try {
       let to_year = arr_splitted_to_date[0];
       let to_month = arr_splitted_to_date[1];
 
-
-      // Validating Month & Year
+      // Validating Selected Month & Year
       // (0 - Same Year) || (-1 - Correct Diff, From month > To Month)-> 
       // parseInt - To convert String into Integer
       if ((parseInt(from_year) - parseInt(to_year) == 0) || (parseInt(from_year) - parseInt(to_year) == -1 && parseInt(from_month) >= parseInt(to_month))) {
@@ -266,45 +275,43 @@ try {
         alert("From & To Dates Interval must be 12 months")
         return
       }
-      // myConsole.log("From & To ::", from_year, from_month, to_year, to_month)
 
+      // 'list_authors' & 'list_authors_data' were already initialized in 'setSelectors()' from 'dict_emails' main dictionary
       for (x in list_authors) {
 
         if (list_selected_authors.includes(x) || list_selected_authors.includes('All')) {
 
+          // Initializing 12 months Data as 0's for all authors
           let list_mods_of_all_months = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-          let auth_data = list_authors_data[x]
+          // Separating Date & Modscore-file_ext from 'list_authors_data' which was separated already from main dictionary 'dict_emails'
+          let __list_cur_author_dates = Object.keys(list_authors_data[x])
+          let __list_cur_author_score_and_file_ext = Object.values(list_authors_data[x])
 
-          // Separating keys & values of 'list_authors_data'
-          let list_keys = Object.keys(auth_data)
-          let list_values = Object.values(auth_data)
+          for (y in __list_cur_author_dates) {
 
+            let date = new Date(__list_cur_author_dates[y])
 
-          for (y in list_keys) {
-            let date = new Date(list_keys[y])
             let data_month = date.getUTCMonth() + 1
             let data_year = date.getUTCFullYear()
 
-            // myConsole.log(list_authors[x], "SubDirectoryIndex::", y, "::", data_year, data_month)
-
-            // Validating with FROM & TO month-year
+            // Validating with 'From' & 'To' month-year
             if (from_year <= data_year && to_year >= data_year) {
-
               // Updating mod score by adding it to current mod for that month
-              // Existing value + Current value, -1 is for index
-
+              // Existing value + Current value, here -1 is for index
               // myConsole.log('month is :', data_month, "Its mod Value is:", list_values[y], "Present Mod value of month ", list_mods_of_all_months)
 
-              let updated_mod_value = list_mods_of_all_months[data_month - 1] + list_values[y]
-
-              // Updating existing value in list 'list_mods_of_all_months' by considering index as 'data_month'
-              list_mods_of_all_months.splice(data_month - 1, 1, updated_mod_value)
-
-              // myConsole.log(list_mods_of_all_months)
+              myConsole.log('\n\nChecking Language::\n-', str_selected_language, "==?", __list_cur_author_score_and_file_ext[y].file_ext,)
+              // Checking Language is selected Language or not, then only adding mod score
+              if (__list_cur_author_score_and_file_ext[y].file_ext.includes(str_selected_language)) {
+                let updated_mod_value = list_mods_of_all_months[data_month - 1] + __list_cur_author_score_and_file_ext[y].mod_score
+                // Updating existing value in list 'list_mods_of_all_months' by considering index as 'data_month'
+                list_mods_of_all_months.splice(data_month - 1, 1, updated_mod_value)
+                // myConsole.log(list_mods_of_all_months)
+              }
             }
           }
-          myConsole.log(list_authors[x], "ModsList::", list_mods_of_all_months)
+          myConsole.log("\n\nModsList of '", list_authors[x], "is :: \n", list_mods_of_all_months)
           list_graph_dataset.push(get_graph_dataset_obj(list_authors[x], list_mods_of_all_months))
         }
       }
@@ -313,8 +320,7 @@ try {
       alert(err)
     }
 
-    myConsole.log("list_graph_dataset::", list_graph_dataset)
-
+    // myConsole.log("list_graph_dataset::", list_graph_dataset)
     // Till now prepared Dataset, Loading Graph now
     if (isLineGraph) {
       loadLineGraph()
@@ -343,12 +349,70 @@ try {
   })
 
 
+  // Get File Path from 'main.js' through Synchronous Communication in IPC
   let pathInfo = ipcRenderer.sendSync('synchronous-getPathInfo', 'get pathInfo')
-
   myConsole.log('\n\nrenderer_graph.js::synchronous-getPathInfo::', pathInfo)
 
   if (pathInfo != undefined) {
-    getDataFromPython(pathInfo.de_anonymized_file_path)
+
+    const fs = require('fs');
+    const papa = require('papaparse');
+    const file = fs.createReadStream(pathInfo.de_anonymized_file_path);
+
+    papa.parse(file, {
+      worker: false, // To run in Main thread if file is Longer, but as this .js file is renderer here we cant use it.So always 'false', otherwise it will throw exception
+      header: true,
+      step: function (result) {
+
+        try {
+
+          myConsole.log('parsing result::\n', result);
+
+          let _date = result.data.committed_date
+          let _email = result.data.Email
+          let _modscore = result.data.mod_score
+          var _file_ext = result.data.file_ext
+
+          // Checking for undefineed o 'NoExt'
+          if (_file_ext == undefined || _file_ext == 'NoExt') {
+            // To avoid adding 'undefined' unnecessarily while adding first time
+            _file_ext = ""
+          }
+
+          // Sometimes getting Unwanted Spaces either at Starting or Ending. So trimming
+          _file_ext = _file_ext.trim()
+
+          // If 'Email' not yet existing, then adding it
+          if (!dict_emails.hasOwnProperty(result.data.Email)) {
+            dict_emails[_email] = { [_date]: { mod_score: _modscore, file_ext: _file_ext } }
+          } else {
+            // So Email exists already
+            let value_for_email = dict_emails[_email]
+            // Checking if current date already existing
+            // If Date not added then add now as Value
+            if (!value_for_email.hasOwnProperty(_date)) {
+              dict_emails[_email][_date] = { mod_score: _modscore, file_ext: _file_ext }
+            } else {
+              let value_for_date = value_for_email[_date]
+              // If Date already added, update modscore & file_ext
+              dict_emails[_email][_date].mod_score = parseInt(value_for_date.mod_score) + parseInt(_modscore)
+
+              if (dict_emails[_email][_date].file_ext != "") {
+                dict_emails[_email][_date].file_ext = value_for_date.file_ext + ',' + _file_ext
+              }
+            }
+          }
+        } catch (err) {
+          alert(err)
+        }
+      },
+      complete: function (results, file) {
+        id_loader.style.display = "none"
+        myConsole.log(dict_emails)
+        setSelectors()
+      }
+    });
+
   } else {
     alert('Unable to fetch De-Anonymized file path')
   }

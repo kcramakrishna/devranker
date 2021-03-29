@@ -24,6 +24,8 @@ dict_callback_start_mining = {"status": True, "msg": "", "tc": 0, "cc": 0}
 pandarallel.initialize(verbose=0)
 
 # Methods related to 'DevRanker'
+
+
 def process_commit(commit, doc_list, completed_commits):
     for mod in commit.modifications:
         # Create a field 'file_ext' which is the file 'type'
@@ -170,23 +172,28 @@ def anonymize(output_file_path, email_hash_dict_file_path, anonymized_file_path)
 
     # We will need to create dictionary at some point if we need to display original string.
     target_repo_commits['Author_encrypted'] = \
-        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['Author']), axis=1)
+        target_repo_commits.parallel_apply(
+            lambda x: hash_encrypt(x['Author']), axis=1)
 
     # We will need to create dictionary at some point if we need to display original string.
     target_repo_commits['Committer_encrypted'] = \
-        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['Committer']), axis=1)
+        target_repo_commits.parallel_apply(
+            lambda x: hash_encrypt(x['Committer']), axis=1)
 
     # We will need to create dictionary at some point if we need to display original string.
     target_repo_commits['file_name_encrypted'] = \
-        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_name']), axis=1)
+        target_repo_commits.parallel_apply(
+            lambda x: hash_encrypt(x['file_name']), axis=1)
 
     # We will need to create dictionary at some point if we need to display original string.
     target_repo_commits['file_old_path_encrypted'] = \
-        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_old_path']), axis=1)
+        target_repo_commits.parallel_apply(
+            lambda x: hash_encrypt(x['file_old_path']), axis=1)
 
     # We will need to create dictionary at some point if we need to display original string.
     target_repo_commits['file_new_path_encrypted'] = \
-        target_repo_commits.parallel_apply(lambda x: hash_encrypt(x['file_new_path']), axis=1)
+        target_repo_commits.parallel_apply(
+            lambda x: hash_encrypt(x['file_new_path']), axis=1)
 
     # Drop the clear text columns
     target_repo_commits.drop(columns=['Author', 'Email', 'Committer', 'file_name', 'file_old_path', 'file_new_path'],
@@ -201,7 +208,8 @@ def anonymize(output_file_path, email_hash_dict_file_path, anonymized_file_path)
 
 def de_anonymize(anonymized_predictions_file_path, email_hash_dict_file_path, dev_predictions_file_path):
 
-    anonymized_predictions_data = pandas.read_csv(anonymized_predictions_file_path, low_memory=False)
+    anonymized_predictions_data = pandas.read_csv(
+        anonymized_predictions_file_path, low_memory=False)
     # Read saved dictionary file and recreate the dictionary
     email_hash_dict_file_handler = open(email_hash_dict_file_path, 'rb')
     email_hash_dict = pickle.load(email_hash_dict_file_handler)
@@ -209,12 +217,12 @@ def de_anonymize(anonymized_predictions_file_path, email_hash_dict_file_path, de
 
     # Iterate through each row to put back the emails
     # https://stackoverflow.com/questions/20250771/remap-values-in-pandas-column-with-a-dict
-    predictions_data['Email'] = predictions_data['Email_encrypted'].parallel_map(email_hash_dict)
+    predictions_data['Email'] = predictions_data['Email_encrypted'].parallel_map(
+        email_hash_dict)
 
     predictions_data.to_csv(dev_predictions_file_path)
     # print('De-anon - Done: ', dev_predictions_file_path)
     print('Done')
-
 
 
 def update_progress_bar(completed_commits):
@@ -225,25 +233,6 @@ def update_progress_bar(completed_commits):
     dict_callback_start_mining["cc"] = len_completed_commits
     print(json.dumps(dict_callback_start_mining))
     sys.stdout.flush()
-
-
-def get_csv_data(dev_predictions_file_path):
-    csv_data = pandas.read_csv(dev_predictions_file_path, low_memory=False)
-
-    Emails = csv_data['Email'].unique()
-    dates = csv_data['committed_date'].unique()
-    dicttables = {}
-
-    for extE in Emails:
-        dicttables[extE] = {}
-        for extd in dates:
-            dicttables[extE][extd] = 0
-    # fixed issue while reading modscore, so kept int() to convert into int before serializing into Json
-    # Ref: https://www.javaprogramto.com/2019/11/python-typeerror-integer-json-not-serializable.html            
-    for j in range(csv_data.shape[0]):
-        dicttables[csv_data['Email'][j]][csv_data['committed_date']
-                                         [j]] += int(csv_data['mod_score'][j])  
-    print(json.dumps(dicttables))
 
 
 if __name__ == '__main__':
@@ -273,6 +262,3 @@ if __name__ == '__main__':
 
     elif(method_name == 'de_anonymize'):
         de_anonymize(sys.argv[2], sys.argv[3], sys.argv[4])
-
-    elif(method_name == 'get_csv_data'):
-        get_csv_data(sys.argv[2])

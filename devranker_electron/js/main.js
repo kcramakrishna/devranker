@@ -9,12 +9,6 @@ ipcMain.on('asynchronous-setPathInfo', (event, arg) => {
     event.sender.send('asynchronous-reply-setPathInfo', 'Received')
 })
 
-// Event handler for asynchronous incoming messages
-// ipcMain.on('asynchronous-getPathInfo', (event, arg) => {
-//     console.log('main.js/asynchronous-getPathInfo', arg)
-//     event.sender.send('asynchronous-reply-getPathInfo', pathInfo)
-// })
-
 // Synchronous Communication
 ipcMain.on('synchronous-getPathInfo', (event, arg) => {
     console.log('main.js/synchronous-getPathInfo', arg)
