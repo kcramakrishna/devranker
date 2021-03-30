@@ -301,7 +301,7 @@ try {
               // Existing value + Current value, here -1 is for index
               // myConsole.log('month is :', data_month, "Its mod Value is:", list_values[y], "Present Mod value of month ", list_mods_of_all_months)
 
-              myConsole.log('\n\nChecking Language::\n-', str_selected_language, "==?", __list_cur_author_score_and_file_ext[y].file_ext,)
+              // myConsole.log('\n\nChecking Language::\n-', str_selected_language, "==?", __list_cur_author_score_and_file_ext[y].file_ext,)
               // Checking Language is selected Language or not, then only adding mod score
               if (__list_cur_author_score_and_file_ext[y].file_ext.includes(str_selected_language)) {
                 let updated_mod_value = list_mods_of_all_months[data_month - 1] + __list_cur_author_score_and_file_ext[y].mod_score
@@ -366,15 +366,16 @@ try {
 
         try {
 
-          myConsole.log('parsing result::\n', result);
+          // myConsole.log('parsing result::\n', result);
 
           let _date = result.data.committed_date
           let _email = result.data.Email
           let _modscore = result.data.mod_score
           var _file_ext = result.data.file_ext
+          var _language_supported = result.data.language_supported // dont forgot, its a string value
 
-          // Checking for undefineed o 'NoExt'
-          if (_file_ext == undefined || _file_ext == 'NoExt') {
+          // Checking for undefineed or 'NoExt'
+          if (_file_ext == undefined || _file_ext == 'NoExt' || _language_supported == 'False') {
             // To avoid adding 'undefined' unnecessarily while adding first time
             _file_ext = ""
           }
@@ -408,8 +409,8 @@ try {
       },
       complete: function (results, file) {
         id_loader.style.display = "none"
-        myConsole.log(dict_emails)
         setSelectors()
+        // myConsole.log(dict_emails)
       }
     });
 

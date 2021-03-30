@@ -6,7 +6,6 @@ import multiprocessing as mp
 import pathlib
 import pandas
 import json
-import logging
 import more_itertools
 import pickle
 import hashlib
