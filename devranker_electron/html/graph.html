@@ -9,46 +9,71 @@
     />
     <button id="btn_back" class="btn">
       <i class="fa fa-chevron-left"></i>
-    </button>
-    <select
-      name="emails"
-      style="font-family: Quicksand; display: inline-block"
-      id="select_emails"
-      multiple="multiple"
-    >
-      <option value="All" style="font-family: Quicksand" selected="selected">
-        All Authors
-      </option>
-    </select>
-    <select
-      name="languages"
-      style="font-family: Quicksand"
-      id="select_languages"
-    >
-      <option value="" style="font-family: Quicksand" selected="selected">
-        Select Language
-      </option>
-    </select>
-    <input
-      type="month"
-      class="common_font"
-      id="input_from_month_and_year"
-      name="from_month"
-      value=""
-    />
-    <input
-      type="month"
-      class="common_font"
-      id="input_to_month_and_year"
-      name="to_month"
-      value=""
-    />
+    </button><br>
+    <div class="graph-container">
+      <div style="text-align: center;">
+        <div class="frm-cntrl">
+          <select
+            name="emails"
+            style="font-family: Quicksand; display: inline-block"
+            id="select_emails"
+            multiple="multiple"
+          >
+            <option value="All" style="font-family: Quicksand" selected="selected">
+              All Authors
+            </option>
+          </select>
+       </div>
 
-    <button id="btn_load" class="common_font">Load</button>
+       <div class="frm-cntrl">
+          <label>Select Language</label>
+          <select
+            name="languages"
+            style="font-family: Quicksand"
+            id="select_languages"
+          >
+            <option value="" style="font-family: Quicksand" selected="selected">
+              Select Language
+            </option>
+          </select>
+      </div>
+
+      <div class="frm-cntrl">
+        <label>From</label>
+        <input
+          type="month"
+          class="common_font"
+          id="input_from_month_and_year"
+          name="from_month"
+          value=""
+        />
+      </div>
+
+      <div class="frm-cntrl">
+        <label>To</label>
+        <input
+          type="month"
+          class="common_font"
+          id="input_to_month_and_year"
+          name="to_month"
+          value=""
+        />
+      </div>
+         <div style=" float: left; margin: 18px 5px;">
+          <button id="btn_load_line" class="common_font">Load Line Chart</button>
+        </div>
+         <div style="float: left; margin: 18px 5px;">
+          <button id="btn_load_pie" class="common_font" st>Load Pie Chart</button>
+        </div>
+          <div class="loader" id="id_loader"></div>
+      </div>
+       <br>
+  </div>
   </head>
   <body>
     <div>
-      <canvas id="chart_area" width="400" height="400"></canvas>
+      <canvas id="chart_line_area" width="200" height="200"></canvas>
+      <canvas id="chart_pie_area" width="400" height="400"></canvas>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
       <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
       <script src="../js/renderer_graph.js"></script>
@@ -67,9 +92,101 @@
         --common_font: "Quicksand";
         --common_font_size: 15px;
       }
+      .frm-cntrl{
+        width: 16%; float: left; margin: 0px 15px; text-align: left;
+      }
+      #btn_back{
+        background: #213749;
+        color:#fff;
+        border: none;
+        padding:5px 10px;
+      }
+      #btn_back:hover{
+        background-color: #ebebeb;
+        color:#000;
+      }
+      .graph-container{
+        width: 90%;
+        margin:0 auto;
+        align-items: center;
+      }
+      select{
+        width: 100%;
+        border: 1px solid #ccc;
+        vertical-align: top;
+      }
+     select option{
+      color: #213749;
+     }
+      select option:hover{
+        background-color: #fcc6cf;
+        color: #000;
+     }
+     #select_languages{
+      width: 100%;
+      height: 32px;
+      border: 1px solid #ccc;
+     }
+     #input_from_month_and_year, #input_to_month_and_year{
+      width: 100%;
+      height: 30px;
+      border: 1px solid #ccc;
+     }
+    #btn_load_line{
+      background: #213749;
+      color: #fff;
+      border-radius: 5px;
+      padding:7px 10px;
+      border: none;
+    }
+     #btn_load_line:hover{
+       background-color: #ebebeb;
+       color:#000;
+     }
+     #btn_load_pie{
+      background-color: #ee2e4e;
+      color: #fff;
+      border-radius: 5px;
+      padding:7px 10px;
+      border: none;
+     }
+      #btn_load_pie:hover{
+       background-color: #fcc6cf;
+       color:#000;
+     }
       .common_font {
         font-family: var(--common_font);
         font-size: var(--common_font_size);
+      }
+      .loader {
+        border: 5px solid #f3f3f3; /* Light grey */
+        border-top: 5px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        margin-left: 20px;
+        display: inline-block;
+        justify-content: end;
+        align-self: flex-end;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes lds-roller {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </body>
