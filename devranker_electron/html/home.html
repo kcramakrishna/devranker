@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Devranker - Electron GUI</title>
+  </head>
+  <body>
+     <div class="nistapp-logo"><a href="#"><img src="nist-logo.png"></a></div>
+     <div class="cnz-logo"><a href="#"><img src="cnz-logo.png"></a></div>
+    <div id="container">
+      <!-- ######################### -->
+      <!--          Step-1         -->
+      <!-- ######################### -->
+      <div class="step_1">
+        <div class="status_container">
+          <div class="step_font"><h4>Step-1</h4></div>
+          <div class="status_div"></div>
+        </div>
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Select the Location of Cloned Repo</div>
+            <div class="centre" id="cln_repo"></div>
+            <input
+              class="right"
+              id="btn_browse_cln_repo"
+              value="Browse"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left">Select Destination Directory</div>
+            <div class="centre" id="dest_dir"></div>
+            <input
+              class="right"
+              id="btn_browse_dest_dir"
+              value="Browse"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_start_mining"
+              value="Start Mining"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <div
+              class="progress_bar"
+              id="show_progress"
+              style="display: none; align-self: flex-start"
+            >
+              <progress id="progress_element"></progress>
+              <div
+                id="progress_display"
+                style="display: inline-block; margin-left: 20px"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ######################### -->
+      <!--           Step-2          -->
+      <!-- ######################### -->
+      <div class="step_2">
+        <div class="status_container">
+          <div class="step_font"><h4>Step-2</h4></div>
+          <div class="status_div"></div>
+        </div>
+
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Data File Location at</div>
+            <div class="centre" id="data_file_location"></div>
+            <input class="right" id="btn_dfla" value="Browse" type="button" />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_anonymize"
+              value="Anonymize"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left">Anonymization File Location at</div>
+            <div class="centre" id="ann_file_location"></div>
+            <input class="right" id="btn_afla" value="Browse" type="button" />
+          </div>
+
+          <div class="items_row_div_with_top_margin">
+            <div class="left">Anonymization Dictionary Located at</div>
+            <div class="centre" id="ann_dict_located_at"></div>
+            <input class="right" id="btn_adla" value="Browse" type="button" />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_get_predictions"
+              value="Get Predictions"
+              type="button"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- ######################### -->
+      <!--          Step - 3         -->
+      <!-- ######################### -->
+      <div class="step_3">
+        <div class="status_container">
+          <div class="step_font"><h4>Step-3</h4></div>
+          <div class="status_div"></div>
+        </div>
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">Anonymization Predictions File</div>
+            <div class="centre" id="ann_predictions_file"></div>
+            <input class="right" id="btn_apf" value="Browse" type="button" />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_de_ann"
+              value="De Anonymize"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin"></div>
+        </div>
+      </div>
+
+      <!-- ######################### -->
+      <!--          Step - 4         -->
+      <!-- ######################### -->
+      <div class="step_4">
+        <div class="status_container">
+          <div class="step_font"><h4>Step-4</h4></div>
+          <div class="status_div"></div>
+        </div>
+        <div class="items_container_div">
+          <div class="items_row_div">
+            <div class="left">De-Anonymization Predictions File</div>
+            <div class="centre" id="de_ann_pre_file"></div>
+            <input
+              class="right"
+              id="btn_graph_path"
+              value="Browse"
+              type="button"
+            />
+          </div>
+          <div class="items_row_div_with_top_margin">
+            <div class="left"></div>
+            <input
+              class="normal_button"
+              id="btn_show_charts"
+              value="Show Charts"
+              type="button"
+              href="graph.html"
+            />
+
+            <a
+              id="show_charts_href"
+              class="normal_button"
+              style="display: none"
+              href="graph.html"
+              style="text-align: center"
+              >Show Charts</a
+            >
+          </div>
+        </div>
+      </div>
+     
+      <script src="../js/renderer_home.js"></script>
+      <!-- <input class="right" id="btn" type="button" value=" > " /> -->
+    </div>
+
+    <style>
+       @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Libre+Franklin&display=swap');
+      :root {
+        --common_height: 30px;
+        --middle_padding: 10px;
+        --border_radius: 3px;
+        --statusbar_padding: 5px;
+        --common_space: 20px;
+        --common_space_top: 10px;
+        --common_top_margin: 10px;
+        --button_width: 120px;
+        --common_font: "Libre Franklin", sans-serif;
+        --common_font_size: 15px;
+      }
+      body{
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      }
+      html,
+      body,
+      #fullheight {
+        /* min-height: 90% !important; */
+        height: 100%;
+        display: block;
+      }
+
+      #container {
+        height: 90%;
+        background-color: rgb(255, 255, 255);
+        /* color: rgba(231, 71, 22, 0.856); */
+        border: 3px solid #213749;
+        display: flex;
+        border-radius: 3px;
+        flex-direction: column;
+        /*justify-content: space-evenly;*/
+        order: 4;
+        padding: 20px;  
+      }
+
+      .status_container {
+        height: 100%;
+        width: 60px;
+        /* background-color: rgb(39, 42, 211); */
+        justify-content: center;
+        /* display: inline-block; */
+        align-items: center;
+        margin-right: 30px;
+        align-content: center;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .status_div {
+        width: 10%;
+        /* height: fit; */
+        flex-grow: 1;
+        /* max-height: 100%; */
+        /* min-height: 50%; */
+        margin-top: 5px;
+        align-content: center;
+        padding: var(--statusbar_padding);
+        justify-content: center;
+        align-items: center;
+        align-self: center;
+        background-color: #ee2e4e;
+        border-radius: var(--border_radius);
+      }
+      .status_completed{
+        width: 10%;
+        /* height: fit; */
+        flex-grow: 1;
+        /* max-height: 100%; */
+        /* min-height: 50%; */
+        margin-top: 5px;
+        align-content: center;
+        padding: var(--statusbar_padding);
+        justify-content: center;
+        align-items: center;
+        align-self: center;
+        border-radius: var(--border_radius);
+        background-color: #0b9f19;
+      }
+      .items_container_div {
+        width: 100%;
+        /* flex-grow: 1; */
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .items_row_div {
+        width: 100%;
+        display: flex;
+        align-items: center;
+      }
+      .items_row_div_with_top_margin {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-top: var(--common_space_top);
+      }
+      .step_1 {
+        height: 25%;
+        /* box-sizing: border-box; */
+        /* background-color: rgb(171, 239, 241); */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+        /* padding: 5px; */
+        /* border: 5px solid rgb(255, 255, 255); */
+        border-bottom: 1px solid #ccc;
+        border-radius: 0px;
+        margin-top: 5px;
+      }
+
+      .step_2 {
+        height: 34%;
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0px;
+        margin-top: 5px;
+      }
+
+      .step_3 {
+        height: 20%;
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0px;
+        margin-top: 5px;
+
+      }
+
+      .step_4 {
+        /* box-sizing: border-box; */
+        /* padding: 1%; */
+        border-radius: 5px;
+        padding: 10px;
+        /* display: block; */
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        overflow-y: auto;
+        text-align: center;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+        margin-top: 5px;
+      }
+
+      .left {
+        width: 25%;
+        /* flex-grow: 1; */
+        display: inline-block;
+        /* background-color: blueviolet; */
+        box-sizing: border-box;
+        /* padding: 1%; */
+        text-align: left;
+        justify-content: left;
+        /* border-radius: var(--border_radius); */
+        /* border: 1px solid black; */
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+      }
+
+      .centre {
+        width: 52%;
+        height: var(--common_height);
+        display: inline-block;
+        /* box-sizing: border-box; */
+        /* background-color: crimson; */
+        /* flex-grow: 1; */
+        margin-left: var(--common_space);
+        margin-right: var(--common_space);
+        /* padding: 1%; */
+        align-items: center;
+        overflow: auto;
+        word-wrap: break-word;
+        text-align: center;
+        align-self: center;
+        align-content: center;
+        justify-content: center;
+        border-radius: var(--border_radius);
+        border: 1px solid #ccc;
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+        padding:5px;
+      }
+
+      .right {
+        width: var(--button_width);
+        justify-content: center;
+        background-color: #213749;
+        align-self: center;
+        height: var(--common_height);
+        text-align: center;
+        color: white;
+        border-radius: var(--border_radius);
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+        border: none;
+      }
+      .right:hover{
+         background-color: #ebebeb;
+         color:#000;
+      }
+
+      .normal_button {
+        width: var(--button_width);
+        display: inline-block;
+        margin-left: var(--common_space);
+        background-color: #ee2e4e;
+        height: var(--common_height);
+        text-align: center;
+        color: white;
+        border-radius: var(--border_radius);
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+        border: none;
+      }
+      .normal_button:hover{
+        background-color: #fcc6cf;
+        color:#000;
+      }
+      .progress_bar {
+        width: 30%;
+        height: 20px;
+        display: inline-block;
+        /* margin-left: var(--common_space); */
+        border-radius: var(--border_radius);
+      }
+      .step_font {
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
+        color: #213749;
+      }
+      .nistapp-logo{
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        box-shadow: 1px 1px 10px #ccc;
+        text-align: center;
+        float: right;
+        position: fixed;
+        bottom: 3%;
+        right: 3%;
+        z-index: 9999 !important;
+      }
+      .nistapp-logo img{
+        padding: 5px;
+      }
+      .cnz-logo{
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        box-shadow: 1px 1px 10px #ccc;
+        text-align: center;
+        float: right;
+        position: fixed;
+        bottom: 3%;
+        right: 7%;
+        z-index: 9999 !important;
+      }
+      .cnz-logo img{
+        padding: 5px;
+      }
+    </style>
+  </body>
+</html>
