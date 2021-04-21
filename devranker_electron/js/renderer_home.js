@@ -11,14 +11,14 @@ try {
   // REST API Upload
   var TAG = '\n(renderer_main.js::)\n'
   let URL = 'http://localhost:5000/predict'
-  let pythonFileName = './py/devranker_functions.py'
+  var pythonFileName = 'devranker_functions.py'
   // to replace os.path.join in python
   var path = require('path');
 
   // To make API Calls, Especially to Upload Anonymized file
   const axios = require('axios');
 
-  let pyshell = new PythonShell(pythonFileName);
+  PythonShell.defaultOptions = { scriptPath: '/Users/rknowsys/Desktop/PythonDevelopment/DEVELOPMENT/issue_50/devranker/devranker_electron/py/' };
 
 
   // Required file paths
@@ -108,7 +108,7 @@ try {
       };
 
       PythonShell.run(pythonFileName, options, function (err, results) {
-
+        alert("err:" + err + "results:" + results)
         myConsole.log(TAG, 'error:', err, 'resp_result:', results)
 
         let data_parsed = JSON.parse(results[0])
@@ -443,3 +443,6 @@ try {
   alert(err)
   myConsole("Global exception:", err)
 }
+
+// Packaging Ref:
+// https://coursetro.com/posts/code/124/Electron-App-Deployment-Tutorial
