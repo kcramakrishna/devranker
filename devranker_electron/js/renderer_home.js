@@ -18,8 +18,17 @@ try {
   // To make API Calls, Especially to Upload Anonymized file
   const axios = require('axios');
 
-  PythonShell.defaultOptions = { scriptPath: '/Users/rknowsys/Desktop/PythonDevelopment/DEVELOPMENT/issue_50/devranker/devranker_electron/py/' };
+  PythonShell.defaultOptions = {
+    scriptPath: '/Users/rknowsys/Desktop/PythonDevelopment/DEVELOPMENT/issue_50/devranker/devranker_electron/py/',
+    // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9',
+    // pythonOptions: ['-u']
+  };
 
+
+  let dictDatesForMining = {
+    from: "",
+    to: ""
+  }
 
   // Required file paths
   let pathInfo = {
@@ -35,19 +44,16 @@ try {
 
 
   // ***********************************************
-  // **************** COMMUNICATION ****************
+  // ***********        FUNCTIONS        ***********
   // ***********************************************
-  // ASYNCHRONOUS - RECEIVER
+  // Asynchronous - Receiver for Communication
   ipcRenderer.on('asynchronous-reply-setPathInfo', (event, arg) => {
     console.log('renderer_home.js::anynchronous-reply-pathInfo::', arg)
   })
 
-
   async function apicall_getPredictionsFile(file_name) {
-
     const fs = require('fs');
     const got = require('got')
-
     const FormData = require('form-data');
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
@@ -67,6 +73,7 @@ try {
           ann_predictions_file.innerHTML = pathInfo.predicted_file_path
 
           alert('Predictions File Generated Successfully.\n\nFile Location is:\n' + filePath)
+          update_STEP_2_StatusBarColor()
           myConsole.log(`File downloaded to ${filePath}`);
         }).
         on("error", (error) => {
@@ -78,14 +85,44 @@ try {
     }
   }
 
-  // ASYNCHRONOUS - SENDER
+  function initAndCreateDevRankerDirectoryIfNotExisting() {
+
+    pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
+
+    if (!fs.existsSync(pathInfo.devranker_dir)) {
+      fs.mkdirSync(pathInfo.devranker_dir);
+      alert('Created working Directory: \n\n' + pathInfo.devranker_dir)
+    }
+  }
+
+  // To check whether Date Radiobutton selected or not
+  function isDateRangeSelected() {
+    return radio_btn_choice2.checked == true
+  }
+
+  function update_STEP_1_StatusBarColor() {
+    id_for_step_1_status.className = "status_completed";
+  }
+
+  function update_STEP_2_StatusBarColor() {
+    id_for_step_2_status.className = "status_completed";
+  }
+
+  function update_STEP_3_StatusBarColor() {
+    id_for_step_3_status.className = "status_completed";
+  }
+
+  function update_STEP_4_StatusBarColor() {
+    id_for_step_4_status.className = "status_completed";
+  }
+  // Asynchronous - Sender
   function storePathInfoInMainJs() {
     ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
     myConsole.log(TAG, 'btn_browse_dest_dir/pathInfo:', pathInfo)
   }
 
   // ***********************************************
-  // **************** CLICK EVENTS  ****************
+  // ***********      CLICK EVENTS       ***********
   // ***********************************************
   // Clone Repository
   btn_browse_cln_repo.addEventListener('click', async (event) => {
@@ -108,7 +145,7 @@ try {
       };
 
       PythonShell.run(pythonFileName, options, function (err, results) {
-        alert("err:" + err + "results:" + results)
+
         myConsole.log(TAG, 'error:', err, 'resp_result:', results)
 
         let data_parsed = JSON.parse(results[0])
@@ -143,20 +180,71 @@ try {
     }
   });
 
-  function initAndCreateDevRankerDirectoryIfNotExisting() {
 
-    pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
+  // To validate From & To dates for Mining, this method will be called once 'DateRange' radiobutton selected.
+  function validateMiningFromAndToDates(from, to) {
 
-    if (!fs.existsSync(pathInfo.devranker_dir)) {
-      fs.mkdirSync(pathInfo.devranker_dir);
-      alert('Created working Directory: \n\n' + pathInfo.devranker_dir)
+    let errMsg = 'TO date must be greater than FROM date'
+
+    if (from == '' || from == undefined) {
+      alert('Please Select Start Date')
+      return false
+    } else if (to == '' || to == undefined) {
+      alert('Please Select End Date')
+      return false
     }
+
+    let arr_splitted_from_date = from.split("-")
+    let arr_splitted_to_date = to.split("-")
+
+    let from_year = arr_splitted_from_date[0];
+    let from_month = arr_splitted_from_date[1];
+    let from_day = arr_splitted_from_date[2];
+
+    let to_year = arr_splitted_to_date[0];
+    let to_month = arr_splitted_to_date[1];
+    let to_day = arr_splitted_to_date[2];
+
+    if (from_year > to_year) {
+      alert(errMsg)
+      return false
+    } else if (from_year == to_year) {
+      if (from_month > to_month) {
+        alert(errMsg)
+        return false
+      } else if (from_month == to_month) {
+        if (from_day >= to_day) {
+          alert(errMsg)
+          return false
+        }
+      }
+    }
+
+    return true
   }
+  // Set From & To Dates
+  function setMiningFromAndToDates(from, to) {
+    dictDatesForMining.from = from
+    dictDatesForMining.to = to
+  }
+  // Radio button 1 selection
+  radio_btn_choice1.addEventListener('click', async () => {
+
+    div_dateselection.style.display = 'none'
+
+    // Setting from & to dates in dictionary with empty
+    dictDatesForMining.from = ""
+    dictDatesForMining.to = ""
+  })
+
+  // Radio button 2 selection
+  radio_btn_choice2.addEventListener('click', async () => {
+    div_dateselection.style.display = 'block'
+  })
 
   // Start Mining
   btn_start_mining.addEventListener('click', async () => {
-    var step_1 = document.getElementsByClassName('step_1')[0];
-      step_1.getElementsByClassName("status_div")[0].className = "status_completed";
+    
     try {
       // myConsole.log(TAG, 'btn_start_mining/pathInfo:', pathInfo)
       if (pathInfo.gitDirectory == '') {
@@ -164,6 +252,19 @@ try {
       } else if (pathInfo.DestDirectory == '') {
         alert('Please Select Destination Directory')
       } else {
+        // Checking whether Date Selection for Mining Selected or not, Managing Dates here only. Not by clicking Radio buttons, Because that is useless
+        if (isDateRangeSelected()) {
+          let startDate = input_start_date.value
+          let endDate = input_end_date.value
+          // Validating Date
+          if(validateMiningFromAndToDates(startDate, endDate)) {
+            setMiningFromAndToDates(startDate, endDate)
+          } else {
+            return
+          }
+        } else {
+          setMiningFromAndToDates("All", "All")
+        }
 
         let reponame = path.basename(pathInfo.gitDirectory) + '.git.csv'
 
@@ -176,8 +277,10 @@ try {
 
         // Communicate with Python
         let options = {
+          // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9',
+          // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages',
           mode: 'text',
-          args: ['start_mining', pathInfo.gitDirectory, pathInfo.devranker_dir, pathInfo.output_file_name]
+          args: ['start_mining', pathInfo.gitDirectory, pathInfo.devranker_dir, pathInfo.output_file_name, dictDatesForMining.from, dictDatesForMining.to]
         };
 
         progress_element.value = "0"
@@ -202,6 +305,8 @@ try {
               progress_display.innerHTML = ""
 
               data_file_location.innerHTML = pathInfo.output_file_name
+
+              update_STEP_1_StatusBarColor()
 
             } else if (data_parsed.msg == 'Progress') {
 
@@ -282,8 +387,7 @@ try {
 
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
-    var step_2 = document.getElementsByClassName('step_2')[0];
-    step_2.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -304,8 +408,7 @@ try {
 
   // De-Anonymize
   btn_de_ann.addEventListener('click', (event) => {
-   var step_3 = document.getElementsByClassName('step_3')[0];
-    step_3.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -352,6 +455,9 @@ try {
               de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
 
               storePathInfoInMainJs()
+
+              update_STEP_3_StatusBarColor()
+
             } else if (data == 'exc') {
               alert(results[1])
             }
@@ -429,12 +535,13 @@ try {
 
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
-   var step_4 = document.getElementsByClassName('step_4')[0];
-   step_4.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     if (pathInfo.de_anonymized_file_path == '') {
       alert('Please Choose De-Anonymized File to see Charts')
       return
     }
+
+    update_STEP_4_StatusBarColor()
     // show_charts_href.click()
     remote.getCurrentWindow().loadFile('./html/graph.html')
   });
