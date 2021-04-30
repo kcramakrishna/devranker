@@ -273,7 +273,7 @@ try {
 
         pathInfo.output_file_name = path.join(pathInfo.devranker_dir, reponame)
 
-        myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo)
+        myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo, '\nDateRange:',dictDatesForMining)
 
         // Communicate with Python
         let options = {
@@ -291,11 +291,14 @@ try {
 
         pyshell.on('message', function (message) {
 
-          let data_parsed = JSON.parse(message)
+          myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
 
           try {
 
-            myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
+            // myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
+
+            let data_parsed = JSON.parse(message)
+
 
             if (data_parsed.msg == 'Done') {
 
@@ -308,12 +311,17 @@ try {
 
               update_STEP_1_StatusBarColor()
 
+            } else if(data_parsed.msg == 'no_commits') {
+              alert("No commits available for selected Date Range")
+              show_progress.style.display = "none"
+              progress_display.innerHTML = ""
             } else if (data_parsed.msg == 'Progress') {
 
               progress_element.max = data_parsed.tc
               progress_element.value = data_parsed.cc
 
               progress_display.innerHTML = data_parsed.cc + " / " + data_parsed.tc
+              
               myConsole.log(data_parsed.cc, " / ", data_parsed.tc)
 
             } else {
