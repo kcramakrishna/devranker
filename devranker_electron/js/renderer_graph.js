@@ -7,7 +7,6 @@ try {
   const { type } = require('os');
   const { ipcRenderer } = require('electron')
   var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
-  let pythonFileName = './py/devranker_functions.py'
 
 
   // Dictionary which is holding entire data from csv
@@ -120,7 +119,7 @@ try {
       }
 
       // Managing Visibility of canvas of line & pie charts
-      myConsole.log('\n\n\n Pie Chart Data after Added Mod Scores for idividual Authores is::', list_mods_sum)
+      myConsole.log('\n\n\n Pie Chart Data after Added Mod Scores for idividual Authors is::', list_mods_sum)
       ctx_for_linechart.style.display = "none"
       ctx_for_piechart.style.display = 'block'
 
