@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import sys
-# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages')
 import git
 from pydriller import RepositoryMining
 import multiprocessing as mp
@@ -105,12 +104,9 @@ def store_commit_data(git_directory_path, devranker_dir, output_file_path, str_f
     else:
         arr_from_date = str_from_date.split("-")
         arr_to_date = str_to_date.split("-")
-        # https://pydriller.readthedocs.io/_/downloads/en/1.0/pdf/
 
         dt_from = datetime(int(arr_from_date[0]), int(arr_from_date[1]), int(arr_from_date[2]), 0, 0, 0)
         dt_to = datetime(int(arr_to_date[0]), int(arr_to_date[1]), int(arr_to_date[2]), 0, 0, 0)
-        # print(dt_from)
-        # print(dt_to)
         commits = RepositoryMining(git_directory_path, since=dt_from, to=dt_to).traverse_commits()
         # 'more_itertools' used here to find commits count as 'commits' is Iterable
         # Note: ilen(commits) consumes the iterable 'commits'

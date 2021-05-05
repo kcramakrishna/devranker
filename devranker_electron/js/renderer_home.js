@@ -11,19 +11,12 @@ try {
   // REST API Upload
   var TAG = '\n(renderer_main.js::)\n'
   let URL = 'http://localhost:5000/predict'
-  var pythonFileName = 'devranker_functions.py'
+  var pythonFileName = 'py/devranker_functions.py'
   // to replace os.path.join in python
   var path = require('path');
 
   // To make API Calls, Especially to Upload Anonymized file
   const axios = require('axios');
-
-  PythonShell.defaultOptions = {
-    scriptPath: '/Users/rknowsys/Desktop/PythonDevelopment/DEVELOPMENT/issue_50/devranker/devranker_electron/py/',
-    // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9',
-    // pythonOptions: ['-u']
-  };
-
 
   let dictDatesForMining = {
     from: "",
@@ -277,8 +270,6 @@ try {
 
         // Communicate with Python
         let options = {
-          // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9',
-          // pythonPath: '/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages',
           mode: 'text',
           args: ['start_mining', pathInfo.gitDirectory, pathInfo.devranker_dir, pathInfo.output_file_name, dictDatesForMining.from, dictDatesForMining.to]
         };
