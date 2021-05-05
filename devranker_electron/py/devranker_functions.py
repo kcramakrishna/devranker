@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import sys
-# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages')
 import git
 from pydriller import RepositoryMining
 import multiprocessing as mp
