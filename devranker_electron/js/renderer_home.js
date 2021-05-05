@@ -50,7 +50,7 @@ try {
     const FormData = require('form-data');
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
-    // TODO: Ravi - Replace this code to get file name also from Response
+    // TODO: Ravi - Replace this code to get file name from Response
     let filePath = path.join(pathInfo.devranker_dir, 'cpu_scores_' + file_name)
     try {
       const res = await got.stream(URL, {
@@ -423,7 +423,17 @@ try {
       initAndCreateDevRankerDirectoryIfNotExisting()
       let reponame = path.basename(pathInfo.predicted_file_path)
 
-      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_' + reponame)
+      if(!reponame.includes("_anonymized")) {
+          // Ravi: Because i want to maintain following structure
+          // "cpu_scores_anonymized_<repoName>.csv" - For Anonymized File name
+          // "cpu_scores_de_anonymized_<repoName>.csv" - For De-Anonymized File name
+          // So if there is no '_anonymized' in file name then i cant fulfil the requirement as user uploaded wrong file or renamed file which is not acceptable
+          alert("Not a valid Anonymized file, Please upload valid File")
+          return
+      } 
+      reponame = reponame.replace("_anonymized", "_de_anonymized")
+
+      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, reponame)
       let options = {
         mode: 'text',
         args: ['de_anonymize',
