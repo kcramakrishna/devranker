@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 import git
@@ -71,7 +72,7 @@ def process_commit(commit, doc_list, completed_commits):
 
 
 # def store_commit_data(get_git_directory_path, get_devranker_dir, get_output_file_path):
-def store_commit_data(git_directory_path, devranker_dir, output_file_path):
+def store_commit_data(git_directory_path, devranker_dir, output_file_path, str_from_date, str_to_date):
     # Why 'set_start_method("spawn")'?
     # Because getting Multiple windows unnecessarily and window became unresponsive after Mining is done
     # Ref: https://pythonspeed.com/articles/python-multiprocessing/
@@ -86,19 +87,39 @@ def store_commit_data(git_directory_path, devranker_dir, output_file_path):
     # Ref: https://pythonspeed.com/articles/python-multiprocessing/
     pool = mp.Pool(mp.cpu_count())
 
+    global total_commits_count
     # If the Repo has just been cloned, the program will traverse the whole Repo
     # https://dzone.com/articles/shared-counter-python%E2%80%99s
-    commits = RepositoryMining(git_directory_path).traverse_commits()
-    global total_commits_count
-    # 'more_itertools' used here to find commits count as 'commits' is Iterable
-    # Note: ilen(commits) consumes the iterable 'commits'
-    total_commits_count = more_itertools.ilen(commits)
+    if str_from_date == "All":
+        commits = RepositoryMining(git_directory_path).traverse_commits()
+        # 'more_itertools' used here to find commits count as 'commits' is Iterable
+        # Note: ilen(commits) consumes the iterable 'commits'
+        total_commits_count = more_itertools.ilen(commits)
 
-    [pool.apply_async(process_commit(commit, doclist, completed_commits)) for commit in
-     RepositoryMining(git_directory_path).traverse_commits()]
-    # Close Multiprocessing pool
-    pool.close()
-    pool.join()
+        [pool.apply_async(process_commit(commit, doclist, completed_commits)) for commit in
+        RepositoryMining(git_directory_path).traverse_commits()]
+        # Close Multiprocessing pool
+        pool.close()
+        pool.join()
+    else:
+        arr_from_date = str_from_date.split("-")
+        arr_to_date = str_to_date.split("-")
+
+        dt_from = datetime(int(arr_from_date[0]), int(arr_from_date[1]), int(arr_from_date[2]), 0, 0, 0)
+        dt_to = datetime(int(arr_to_date[0]), int(arr_to_date[1]), int(arr_to_date[2]), 0, 0, 0)
+        commits = RepositoryMining(git_directory_path, since=dt_from, to=dt_to).traverse_commits()
+        # 'more_itertools' used here to find commits count as 'commits' is Iterable
+        # Note: ilen(commits) consumes the iterable 'commits'
+        total_commits_count = more_itertools.ilen(commits)
+        if total_commits_count == 0:
+            dict_callback_start_mining["msg"] = "no_commits"
+            print(json.dumps(dict_callback_start_mining))
+            return
+        [pool.apply_async(process_commit(commit, doclist, completed_commits)) for commit in 
+        RepositoryMining(git_directory_path, since=dt_from, to=dt_to).traverse_commits()]
+        # Close Multiprocessing pool
+        pool.close()
+        pool.join()
 
     # We have data in json format but we need output as csv.
     # There are many approaches to doing this including using dictionaries and stuff.
@@ -251,7 +272,7 @@ if __name__ == '__main__':
 
     elif(sys.argv[1] == 'start_mining'):
         try:
-            store_commit_data(sys.argv[2], sys.argv[3], sys.argv[4])
+            store_commit_data(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
         except:
             dict_callback_start_mining["msg"] = sys.exc_info()
             print(json.dumps(dict_callback_start_mining))

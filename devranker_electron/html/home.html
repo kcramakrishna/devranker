@@ -5,8 +5,12 @@
     <title>Devranker - Electron GUI</title>
   </head>
   <body>
-     <div class="nistapp-logo"><a href="#"><img src="nist-logo.png"></a></div>
-     <div class="cnz-logo"><a href="#"><img src="cnz-logo.png"></a></div>
+    <div class="nistapp-logo">
+      <a href="#"><img src="nist-logo.png" /></a>
+    </div>
+    <div class="cnz-logo">
+      <a href="#"><img src="cnz-logo.png" /></a>
+    </div>
     <div id="container">
       <!-- ######################### -->
       <!--          Step-1         -->
@@ -14,7 +18,7 @@
       <div class="step_1">
         <div class="status_container">
           <div class="step_font"><h4>Step-1</h4></div>
-          <div class="status_div"></div>
+          <div id="id_for_step_1_status" class="status_div"></div>
         </div>
         <div class="items_container_div">
           <div class="items_row_div">
@@ -37,6 +41,55 @@
               type="button"
             />
           </div>
+          <!-- Mining Dates Selection -->
+          <div class="items_row_div_with_top_margin">
+            <div class="left">Preferred Date Selection</div>
+            <div style="margin-left: 15px">
+              <input
+                type="radio"
+                id="radio_btn_choice1"
+                name="contact"
+                value="email"
+                checked
+              />
+              <label class="label_date" for="dateChoice1">All Days</label>
+              <input
+                type="radio"
+                id="radio_btn_choice2"
+                name="contact"
+                value="phone"
+              />
+              <label class="label_date" for="dateChoice2">Date Range</label>
+            </div>
+          </div>
+
+          <div
+            id="div_dateselection"
+            class="items_row_div_with_top_margin"
+            style="display: none"
+          >
+            <div class="left"></div>
+            <div style="margin-left: 20px">
+              <label class="label_date" for="start">Start date:</label>
+              <input
+                class="label_date"
+                type="date"
+                id="input_start_date"
+                name="min_start"
+                value=""
+              />
+              <label class="label_date" for="end"> End date:</label>
+              <input
+                class="label_date"
+                type="date"
+                id="input_end_date"
+                name="min_end"
+                value=""
+              />
+            </div>
+          </div>
+
+          <!-- Start Mining -->
           <div class="items_row_div_with_top_margin">
             <div class="left"></div>
             <input
@@ -69,7 +122,7 @@
       <div class="step_2">
         <div class="status_container">
           <div class="step_font"><h4>Step-2</h4></div>
-          <div class="status_div"></div>
+          <div id="id_for_step_2_status" class="status_div"></div>
         </div>
 
         <div class="items_container_div">
@@ -116,7 +169,7 @@
       <div class="step_3">
         <div class="status_container">
           <div class="step_font"><h4>Step-3</h4></div>
-          <div class="status_div"></div>
+          <div id="id_for_step_3_status" class="status_div"></div>
         </div>
         <div class="items_container_div">
           <div class="items_row_div">
@@ -143,7 +196,7 @@
       <div class="step_4">
         <div class="status_container">
           <div class="step_font"><h4>Step-4</h4></div>
-          <div class="status_div"></div>
+          <div id="id_for_step_4_status" class="status_div"></div>
         </div>
         <div class="items_container_div">
           <div class="items_row_div">
@@ -177,14 +230,14 @@
           </div>
         </div>
       </div>
-     
+
       <script src="../js/renderer_home.js"></script>
       <!-- <input class="right" id="btn" type="button" value=" > " /> -->
     </div>
 
     <style>
-       @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Libre+Franklin&display=swap');
+      @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+      @import url("https://fonts.googleapis.com/css?family=Libre+Franklin&display=swap");
       :root {
         --common_height: 30px;
         --middle_padding: 10px;
@@ -197,19 +250,19 @@
         --common_font: "Libre Franklin", sans-serif;
         --common_font_size: 15px;
       }
-      body{
-        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
       html,
       body,
       #fullheight {
         /* min-height: 90% !important; */
-        height: 100%;
+        height: 1000px;
         display: block;
       }
 
       #container {
-        height: 90%;
+        height: 98%;
         background-color: rgb(255, 255, 255);
         /* color: rgba(231, 71, 22, 0.856); */
         border: 3px solid #213749;
@@ -218,7 +271,7 @@
         flex-direction: column;
         /*justify-content: space-evenly;*/
         order: 4;
-        padding: 20px;  
+        padding: 20px;
       }
 
       .status_container {
@@ -249,7 +302,7 @@
         background-color: #ee2e4e;
         border-radius: var(--border_radius);
       }
-      .status_completed{
+      .status_completed {
         width: 10%;
         /* height: fit; */
         flex-grow: 1;
@@ -285,7 +338,8 @@
         margin-top: var(--common_space_top);
       }
       .step_1 {
-        height: 25%;
+        /* height: 25%; */
+        height: 270px;
         /* box-sizing: border-box; */
         /* background-color: rgb(171, 239, 241); */
         /* padding: 1%; */
@@ -306,7 +360,8 @@
       }
 
       .step_2 {
-        height: 34%;
+        /* height: 34%; */
+        height: 250px;
         /* box-sizing: border-box; */
         /* padding: 1%; */
         border-radius: 5px;
@@ -324,7 +379,8 @@
       }
 
       .step_3 {
-        height: 20%;
+        /* height: 20%; */
+        height: 200px;
         /* box-sizing: border-box; */
         /* padding: 1%; */
         border-radius: 5px;
@@ -339,12 +395,12 @@
         border-bottom: 1px solid #ccc;
         border-radius: 0px;
         margin-top: 5px;
-
       }
 
       .step_4 {
         /* box-sizing: border-box; */
         /* padding: 1%; */
+        height: 100px;
         border-radius: 5px;
         padding: 10px;
         /* display: block; */
@@ -395,7 +451,7 @@
         border: 1px solid #ccc;
         font-family: var(--common_font);
         font-size: var(--common_font_size);
-        padding:5px;
+        padding: 5px;
       }
 
       .right {
@@ -411,9 +467,9 @@
         font-size: var(--common_font_size);
         border: none;
       }
-      .right:hover{
-         background-color: #ebebeb;
-         color:#000;
+      .right:hover {
+        background-color: #ebebeb;
+        color: #000;
       }
 
       .normal_button {
@@ -429,9 +485,9 @@
         font-size: var(--common_font_size);
         border: none;
       }
-      .normal_button:hover{
+      .normal_button:hover {
         background-color: #fcc6cf;
-        color:#000;
+        color: #000;
       }
       .progress_bar {
         width: 30%;
@@ -445,7 +501,7 @@
         font-size: var(--common_font_size);
         color: #213749;
       }
-      .nistapp-logo{
+      .nistapp-logo {
         display: block;
         width: 40px;
         height: 40px;
@@ -458,10 +514,10 @@
         right: 3%;
         z-index: 9999 !important;
       }
-      .nistapp-logo img{
+      .nistapp-logo img {
         padding: 5px;
       }
-      .cnz-logo{
+      .cnz-logo {
         display: block;
         width: 40px;
         height: 40px;
@@ -474,8 +530,12 @@
         right: 7%;
         z-index: 9999 !important;
       }
-      .cnz-logo img{
+      .cnz-logo img {
         padding: 5px;
+      }
+      .label_date {
+        font-family: var(--common_font);
+        font-size: var(--common_font_size);
       }
     </style>
   </body>

@@ -11,15 +11,17 @@ try {
   // REST API Upload
   var TAG = '\n(renderer_main.js::)\n'
   let URL = 'http://localhost:5000/predict'
-  let pythonFileName = './py/devranker_functions.py'
+  var pythonFileName = 'py/devranker_functions.py'
   // to replace os.path.join in python
   var path = require('path');
 
   // To make API Calls, Especially to Upload Anonymized file
   const axios = require('axios');
 
-  let pyshell = new PythonShell(pythonFileName);
-
+  let dictDatesForMining = {
+    from: "",
+    to: ""
+  }
 
   // Required file paths
   let pathInfo = {
@@ -35,23 +37,20 @@ try {
 
 
   // ***********************************************
-  // **************** COMMUNICATION ****************
+  // ***********        FUNCTIONS        ***********
   // ***********************************************
-  // ASYNCHRONOUS - RECEIVER
+  // Asynchronous - Receiver for Communication
   ipcRenderer.on('asynchronous-reply-setPathInfo', (event, arg) => {
     console.log('renderer_home.js::anynchronous-reply-pathInfo::', arg)
   })
 
-
   async function apicall_getPredictionsFile(file_name) {
-
     const fs = require('fs');
     const got = require('got')
-
     const FormData = require('form-data');
     var formData = new FormData();
     formData.append('anonymised_file', fs.createReadStream(pathInfo.anonymized_file_path));
-    // TODO: Ravi - Replace this code to get file name also from Response
+    // TODO: Ravi - Replace this code to get file name from Response
     let filePath = path.join(pathInfo.devranker_dir, 'cpu_scores_' + file_name)
     try {
       const res = await got.stream(URL, {
@@ -67,6 +66,7 @@ try {
           ann_predictions_file.innerHTML = pathInfo.predicted_file_path
 
           alert('Predictions File Generated Successfully.\n\nFile Location is:\n' + filePath)
+          update_STEP_2_StatusBarColor()
           myConsole.log(`File downloaded to ${filePath}`);
         }).
         on("error", (error) => {
@@ -78,14 +78,44 @@ try {
     }
   }
 
-  // ASYNCHRONOUS - SENDER
+  function initAndCreateDevRankerDirectoryIfNotExisting() {
+
+    pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
+
+    if (!fs.existsSync(pathInfo.devranker_dir)) {
+      fs.mkdirSync(pathInfo.devranker_dir);
+      alert('Created working Directory: \n\n' + pathInfo.devranker_dir)
+    }
+  }
+
+  // To check whether Date Radiobutton selected or not
+  function isDateRangeSelected() {
+    return radio_btn_choice2.checked == true
+  }
+
+  function update_STEP_1_StatusBarColor() {
+    id_for_step_1_status.className = "status_completed";
+  }
+
+  function update_STEP_2_StatusBarColor() {
+    id_for_step_2_status.className = "status_completed";
+  }
+
+  function update_STEP_3_StatusBarColor() {
+    id_for_step_3_status.className = "status_completed";
+  }
+
+  function update_STEP_4_StatusBarColor() {
+    id_for_step_4_status.className = "status_completed";
+  }
+  // Asynchronous - Sender
   function storePathInfoInMainJs() {
     ipcRenderer.send('asynchronous-setPathInfo', pathInfo)
     myConsole.log(TAG, 'btn_browse_dest_dir/pathInfo:', pathInfo)
   }
 
   // ***********************************************
-  // **************** CLICK EVENTS  ****************
+  // ***********      CLICK EVENTS       ***********
   // ***********************************************
   // Clone Repository
   btn_browse_cln_repo.addEventListener('click', async (event) => {
@@ -143,20 +173,71 @@ try {
     }
   });
 
-  function initAndCreateDevRankerDirectoryIfNotExisting() {
 
-    pathInfo.devranker_dir = path.join(pathInfo.DestDirectory, 'Devranker')
+  // To validate From & To dates for Mining, this method will be called once 'DateRange' radiobutton selected.
+  function validateMiningFromAndToDates(from, to) {
 
-    if (!fs.existsSync(pathInfo.devranker_dir)) {
-      fs.mkdirSync(pathInfo.devranker_dir);
-      alert('Created working Directory: \n\n' + pathInfo.devranker_dir)
+    let errMsg = 'TO date must be greater than FROM date'
+
+    if (from == '' || from == undefined) {
+      alert('Please Select Start Date')
+      return false
+    } else if (to == '' || to == undefined) {
+      alert('Please Select End Date')
+      return false
     }
+
+    let arr_splitted_from_date = from.split("-")
+    let arr_splitted_to_date = to.split("-")
+
+    let from_year = arr_splitted_from_date[0];
+    let from_month = arr_splitted_from_date[1];
+    let from_day = arr_splitted_from_date[2];
+
+    let to_year = arr_splitted_to_date[0];
+    let to_month = arr_splitted_to_date[1];
+    let to_day = arr_splitted_to_date[2];
+
+    if (from_year > to_year) {
+      alert(errMsg)
+      return false
+    } else if (from_year == to_year) {
+      if (from_month > to_month) {
+        alert(errMsg)
+        return false
+      } else if (from_month == to_month) {
+        if (from_day >= to_day) {
+          alert(errMsg)
+          return false
+        }
+      }
+    }
+
+    return true
   }
+  // Set From & To Dates
+  function setMiningFromAndToDates(from, to) {
+    dictDatesForMining.from = from
+    dictDatesForMining.to = to
+  }
+  // Radio button 1 selection
+  radio_btn_choice1.addEventListener('click', async () => {
+
+    div_dateselection.style.display = 'none'
+
+    // Setting from & to dates in dictionary with empty
+    dictDatesForMining.from = ""
+    dictDatesForMining.to = ""
+  })
+
+  // Radio button 2 selection
+  radio_btn_choice2.addEventListener('click', async () => {
+    div_dateselection.style.display = 'block'
+  })
 
   // Start Mining
   btn_start_mining.addEventListener('click', async () => {
-    var step_1 = document.getElementsByClassName('step_1')[0];
-      step_1.getElementsByClassName("status_div")[0].className = "status_completed";
+    
     try {
       // myConsole.log(TAG, 'btn_start_mining/pathInfo:', pathInfo)
       if (pathInfo.gitDirectory == '') {
@@ -164,6 +245,19 @@ try {
       } else if (pathInfo.DestDirectory == '') {
         alert('Please Select Destination Directory')
       } else {
+        // Checking whether Date Selection for Mining Selected or not, Managing Dates here only. Not by clicking Radio buttons, Because that is useless
+        if (isDateRangeSelected()) {
+          let startDate = input_start_date.value
+          let endDate = input_end_date.value
+          // Validating Date
+          if(validateMiningFromAndToDates(startDate, endDate)) {
+            setMiningFromAndToDates(startDate, endDate)
+          } else {
+            return
+          }
+        } else {
+          setMiningFromAndToDates("All", "All")
+        }
 
         let reponame = path.basename(pathInfo.gitDirectory) + '.git.csv'
 
@@ -172,12 +266,12 @@ try {
 
         pathInfo.output_file_name = path.join(pathInfo.devranker_dir, reponame)
 
-        myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo)
+        myConsole.log(TAG, 'btn_start_mining::AfterUpdate::', pathInfo, '\nDateRange:',dictDatesForMining)
 
         // Communicate with Python
         let options = {
           mode: 'text',
-          args: ['start_mining', pathInfo.gitDirectory, pathInfo.devranker_dir, pathInfo.output_file_name]
+          args: ['start_mining', pathInfo.gitDirectory, pathInfo.devranker_dir, pathInfo.output_file_name, dictDatesForMining.from, dictDatesForMining.to]
         };
 
         progress_element.value = "0"
@@ -188,11 +282,14 @@ try {
 
         pyshell.on('message', function (message) {
 
-          let data_parsed = JSON.parse(message)
+          myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
 
           try {
 
-            myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
+            // myConsole.log("btn_start_mining/PhthonShell-start_mining::", message)
+
+            let data_parsed = JSON.parse(message)
+
 
             if (data_parsed.msg == 'Done') {
 
@@ -203,12 +300,19 @@ try {
 
               data_file_location.innerHTML = pathInfo.output_file_name
 
+              update_STEP_1_StatusBarColor()
+
+            } else if(data_parsed.msg == 'no_commits') {
+              alert("No commits available for selected Date Range")
+              show_progress.style.display = "none"
+              progress_display.innerHTML = ""
             } else if (data_parsed.msg == 'Progress') {
 
               progress_element.max = data_parsed.tc
               progress_element.value = data_parsed.cc
 
               progress_display.innerHTML = data_parsed.cc + " / " + data_parsed.tc
+              
               myConsole.log(data_parsed.cc, " / ", data_parsed.tc)
 
             } else {
@@ -282,8 +386,7 @@ try {
 
   // Get Predictions
   btn_get_predictions.addEventListener('click', (event) => {
-    var step_2 = document.getElementsByClassName('step_2')[0];
-    step_2.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -304,8 +407,7 @@ try {
 
   // De-Anonymize
   btn_de_ann.addEventListener('click', (event) => {
-   var step_3 = document.getElementsByClassName('step_3')[0];
-    step_3.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     try {
       if (pathInfo.DestDirectory == '') {
         alert('Please Choose Destination Directory')
@@ -321,7 +423,17 @@ try {
       initAndCreateDevRankerDirectoryIfNotExisting()
       let reponame = path.basename(pathInfo.predicted_file_path)
 
-      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, 'dev_' + reponame)
+      if(!reponame.includes("_anonymized")) {
+          // Ravi: Because i want to maintain following structure
+          // "cpu_scores_anonymized_<repoName>.csv" - For Anonymized File name
+          // "cpu_scores_de_anonymized_<repoName>.csv" - For De-Anonymized File name
+          // So if there is no '_anonymized' in file name then i cant fulfil the requirement as user uploaded wrong file or renamed file which is not acceptable
+          alert("Not a valid Anonymized file, Please upload valid File")
+          return
+      } 
+      reponame = reponame.replace("_anonymized", "_de_anonymized")
+
+      pathInfo.de_anonymized_file_path = path.join(pathInfo.devranker_dir, reponame)
       let options = {
         mode: 'text',
         args: ['de_anonymize',
@@ -352,6 +464,9 @@ try {
               de_ann_pre_file.innerHTML = pathInfo.de_anonymized_file_path
 
               storePathInfoInMainJs()
+
+              update_STEP_3_StatusBarColor()
+
             } else if (data == 'exc') {
               alert(results[1])
             }
@@ -429,12 +544,13 @@ try {
 
   // Show Charts
   btn_show_charts.addEventListener('click', (event) => {
-   var step_4 = document.getElementsByClassName('step_4')[0];
-   step_4.getElementsByClassName("status_div")[0].className = "status_completed";
+   
     if (pathInfo.de_anonymized_file_path == '') {
       alert('Please Choose De-Anonymized File to see Charts')
       return
     }
+
+    update_STEP_4_StatusBarColor()
     // show_charts_href.click()
     remote.getCurrentWindow().loadFile('./html/graph.html')
   });
@@ -443,3 +559,6 @@ try {
   alert(err)
   myConsole("Global exception:", err)
 }
+
+// Packaging Ref:
+// https://coursetro.com/posts/code/124/Electron-App-Deployment-Tutorial
